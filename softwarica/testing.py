@@ -15,59 +15,59 @@ customtkinter.set_default_color_theme("dark-blue")
 class App(customtkinter.CTk):
   def __init__(self):
     super().__init__()
+    self.loginPage()
 
 # loginWindow=customtkinter.CTk()
+  def loginPage(self):
+      self.geometry("1200x800")
+      self.title("Hotel Management System")
+
     
 
-    self.geometry("1200x800")
-    self.title("Hotel Management System")
+      self.hotelName=customtkinter.CTkLabel(self,text="AfnaiGhar", font=("Comic Sans MS",64,"bold"),text_color="white")
+      self.hotelName.grid(row=0,column=0,padx=100,pady=50)
 
-   
-
-    self.hotelName=customtkinter.CTkLabel(self,text="AfnaiGhar", font=("Comic Sans MS",64,"bold"),text_color="white")
-    self.hotelName.grid(row=0,column=0,padx=100,pady=50)
-
-    self.loginFrame=customtkinter.CTkFrame(self,corner_radius=10)
-    self.loginFrame.grid(row=1,column=0,padx=500)
+      self.loginFrame=customtkinter.CTkFrame(self,corner_radius=10)
+      self.loginFrame.grid(row=1,column=0,padx=500)
 
 
 
-    # login frame element
-    self.userLabel=customtkinter.CTkLabel(self.loginFrame,text="username")
-    self.userLabel.grid(row=0,column=0,padx=(20,10),pady=(60,20))
+      # login frame element
+      self.userLabel=customtkinter.CTkLabel(self.loginFrame,text="username")
+      self.userLabel.grid(row=0,column=0,padx=(20,10),pady=(60,20))
 
-    self.userEntry=customtkinter.CTkEntry(self.loginFrame,placeholder_text="Enter your username",width=200,height=30)
-    self.userEntry.grid(row=0,column=1,padx=(10,60),pady=(60,20))
+      self.userEntry=customtkinter.CTkEntry(self.loginFrame,placeholder_text="Enter your username",width=200,height=30)
+      self.userEntry.grid(row=0,column=1,padx=(10,60),pady=(60,20))
 
-    self.passwordLabel=customtkinter.CTkLabel(self.loginFrame,text="Password")
-    self.passwordLabel.grid(row=1,column=0,padx=(20,10))
+      self.passwordLabel=customtkinter.CTkLabel(self.loginFrame,text="Password")
+      self.passwordLabel.grid(row=1,column=0,padx=(20,10))
 
-    self.passwordEntry=customtkinter.CTkEntry(self.loginFrame,placeholder_text="Enter your password",width=200,height=30,show="*",)
-    self.passwordEntry.grid(row=1,column=1,padx=(10,60))
+      self.passwordEntry=customtkinter.CTkEntry(self.loginFrame,placeholder_text="Enter your password",width=200,height=30,show="*",)
+      self.passwordEntry.grid(row=1,column=1,padx=(10,60))
 
-    self.show=customtkinter.CTkCheckBox(self.loginFrame,text="Show",font=('arial',14),command=self.toggle_password)
-    self.show.grid(row=1,column=2,)
-
-
-    self.fpasswordLabel=customtkinter.CTkLabel(self.loginFrame,text="Forget Password?",font=("arial",12,"underline"))
-    self.fpasswordLabel.grid(row=2,column=1,padx=(0,140),pady=10)
-    self.fpasswordLabel.bind("<Button-1>", lambda event: fpassword()) 
+      self.show=customtkinter.CTkCheckBox(self.loginFrame,text="Show",font=('arial',14),command=self.toggle_password)
+      self.show.grid(row=1,column=2,)
 
 
-    self.loginButton=customtkinter.CTkButton(self.loginFrame,text="LogIn",
-                                                  font=("arial",20,"bold"),
-                                                  corner_radius=10,
-                                                  height=30,
-                                                  width=40,
-                                                  fg_color="#B7D5B5",
-                                                  command=self.login)
-    self.loginButton.grid(row=3,column=1,padx=(0,190),pady=20)
+      self.fpasswordLabel=customtkinter.CTkLabel(self.loginFrame,text="Forget Password?",font=("arial",12,"underline"))
+      self.fpasswordLabel.grid(row=2,column=1,padx=(0,140),pady=10)
+      self.fpasswordLabel.bind("<Button-1>", lambda event: fpassword()) 
 
-    self.signUpLabel=customtkinter.CTkLabel(self.loginFrame,text="Sign Up", font=("arial",12,"underline"))
-    self.signUpLabel.grid(row=4,column=0,padx=(170,0),pady=30)
-    self.signUpLabel.bind("<Button-1>", lambda event: signup()) 
-    self.signUpLabel=customtkinter.CTkLabel(self.loginFrame,text="If you are not registered", font=("arial",12,))
-    self.signUpLabel.grid(row=4,column=1,padx=(0,130),pady=30)
+
+      self.loginButton=customtkinter.CTkButton(self.loginFrame,text="LogIn",
+                                                    font=("arial",20,"bold"),
+                                                    corner_radius=10,
+                                                    height=30,
+                                                    width=40,
+                                                    fg_color="#B7D5B5",
+                                                    command=self.login)
+      self.loginButton.grid(row=3,column=1,padx=(0,190),pady=20)
+
+      self.signUpLabel=customtkinter.CTkLabel(self.loginFrame,text="Sign Up", font=("arial",12,"underline"))
+      self.signUpLabel.grid(row=4,column=0,padx=(170,0),pady=30)
+      self.signUpLabel.bind("<Button-1>", lambda event: signup()) 
+      self.signUpLabel=customtkinter.CTkLabel(self.loginFrame,text="If you are not registered", font=("arial",12,))
+      self.signUpLabel.grid(row=4,column=1,padx=(0,130),pady=30)
 
   def toggle_password(self):
     if self.show.get():
