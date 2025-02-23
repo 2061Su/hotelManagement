@@ -22,13 +22,14 @@ class App(customtkinter.CTk):
   def loginPage(self):
       self.geometry("1200x800")
       self.title("Hotel Management System")
+      
 
     
 
       self.hotelName=customtkinter.CTkLabel(self,text="AfnaiGhar", font=("Comic Sans MS",64,"bold"),text_color="white")
       self.hotelName.grid(row=0,column=0,padx=100,pady=50)
 
-      self.loginFrame=customtkinter.CTkFrame(self,corner_radius=10)
+      self.loginFrame=customtkinter.CTkFrame(self,corner_radius=10,fg_color="#5c364b")
       self.loginFrame.grid(row=1,column=0,padx=500)
 
 
@@ -62,8 +63,9 @@ class App(customtkinter.CTk):
                                                     width=40,
                                                     cursor="hand1",
                                                     fg_color="#B7D5B5",
+                                                    hover_color="#94bf91",
                                                     command=self.login)
-      self.loginButton.grid(row=3,column=1,padx=(0,190),pady=20)
+      self.loginButton.grid(row=3,column=1,padx=(0,120),pady=20)
 
       self.signUpLabel=customtkinter.CTkLabel(self.loginFrame,text="Sign Up", font=("arial",12,"underline"),cursor="hand2")
       self.signUpLabel.grid(row=4,column=0,padx=(170,0),pady=30)

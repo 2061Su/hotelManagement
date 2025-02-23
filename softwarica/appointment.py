@@ -63,13 +63,13 @@ class BookingWindow(customtkinter.CTkToplevel):
         # Check-in Date
         checkinLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-in Date")
         checkinLabel.grid(row=7, column=0, padx=(50, 10), pady=10)
-        checkinEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter check-in date", width=200, height=30)
+        checkinEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
         checkinEntry.grid(row=7, column=1, padx=(10, 60), pady=10)
 
         # Check-out Date
         checkoutLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-out Date")
         checkoutLabel.grid(row=8, column=0, padx=(50, 10), pady=10)
-        checkoutEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter check-out date", width=200, height=30)
+        checkoutEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
         checkoutEntry.grid(row=8, column=1, padx=(10, 60), pady=10)
 
         # Number of Guests
@@ -81,8 +81,17 @@ class BookingWindow(customtkinter.CTkToplevel):
         # Payment
         paymentLabel = customtkinter.CTkLabel(bookingFrame, text="Payment", text_color="black")
         paymentLabel.grid(row=10, column=0, padx=(50, 10), pady=10)
-        paymentEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter payment details", width=200, height=30)
-        paymentEntry.grid(row=10, column=1, padx=(10, 60), pady=10)
+        
+        # Create a StringVar to hold the value of the selected payment option
+        payment_option = StringVar(value="Cash")
+
+        # Create and place the "Cash" radio button
+        radio_cash = customtkinter.CTkRadioButton(bookingFrame, text="Cash", variable=payment_option, value="Cash", )
+        radio_cash.grid(row=10,column=0,columnspan=2)
+
+        # Create and place the "eSewa" radio button
+        radio_esewa = customtkinter.CTkRadioButton(bookingFrame, text="eSewa", variable=payment_option, value="eSewa",)
+        radio_esewa.grid(row=10,column=1,columnspan=3)
 
         # Book Button
         bookingButton = customtkinter.CTkButton(bookingFrame, text="Book", font=("arial", 20, "bold"), corner_radius=10, height=30, width=40, text_color="white", fg_color="#B7D5B5", command=self.book)

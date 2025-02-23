@@ -3,9 +3,14 @@ import customtkinter
 from tkinter import messagebox
 from PIL import Image,ImageTk
 import sqlite3
+from tkcalendar import DateEntry
+from datetime import date
+
+import ttkbootstrap as tb
 
 
-
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("dark-blue")
 
 def book():
   messagebox.showinfo(title="successfully booked ",message="you have successfully booked !")
@@ -82,8 +87,13 @@ numberEntry.grid(row=6,column=1,padx=(10,60),pady=10)
 numberLabel=customtkinter.CTkLabel(bookingFrame,text_color="black",text="check-in-date")
 numberLabel.grid(row=7,column=0,padx=(50,10),pady=10)
 
+date_entry = tb.DateEntry(bookingFrame,bootstyle="primary",width=20,startdate=date(2025, 2,23))
+date_entry.grid(row=7,column=1,padx=(0,320))
+
 numberLabel=customtkinter.CTkLabel(bookingFrame,text_color="black",text="check-out-date")
 numberLabel.grid(row=8,column=0,padx=(50,10),pady=10)
+date_end = tb.DateEntry(bookingFrame,bootstyle="primary",width=20,startdate=date(2025, 2,23))
+date_end.grid(row=8,column=1,padx=(0,320))
 
 numberLabel=customtkinter.CTkLabel(bookingFrame,text_color="black",text="Number of guests")
 numberLabel.grid(row=9,column=0,padx=(50,10),pady=10)

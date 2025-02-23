@@ -8,7 +8,7 @@ def signup():
   signupWindow.title("signup")
   signupWindow.geometry("1000x600")
 
-  signupFrame=customtkinter.CTkFrame(signupWindow,corner_radius=10)
+  signupFrame=customtkinter.CTkFrame(signupWindow,corner_radius=10,fg_color="#5c364b")
   signupFrame.grid(row=0,column=0,padx=(100,0),pady=(100,0))
 
 
@@ -116,6 +116,7 @@ def signup():
                                                 width=40,
                                                 cursor="hand1",
                                                 fg_color="#B7D5B5",
+                                                hover_color="#94bf91",
                                                 command=lambda : register_user(usernameEntry.get(),passwordEntry.get(),userEntry.get(),user1Entry.get(),numberEntry.get(),),)
   signupButton.grid(row=6,column=1,padx=(0,190),pady=20)
 

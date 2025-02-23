@@ -7,32 +7,18 @@ import sqlite3
 
 
 
-def cancel():
-  messagebox.showinfo(title="successfully cancelled ",message="you have successfully cacelled !")
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
-bookingWindow=customtkinter.CTk()
-bookingWindow.title("Afnaighar ")
-bookingWindow.geometry("1200x700")
+adminWindow=customtkinter.CTk()
+adminWindow.title("Afnaighar ")
+adminWindow.geometry("1200x700")
 
 
 
 homeTitle=customtkinter.CTkLabel(bookingWindow,text="AfnaiGhar", font=("Comic Sans MS",48,"bold"),text_color="white",fg_color="transparent")
 homeTitle.grid(row=0,column=0,padx=40,pady=40)
-
-hometabLabel=customtkinter.CTkLabel(bookingWindow,text="HOME",font=("Helvetica",24),fg_color="transparent")
-hometabLabel.grid(row=0,column=1,padx=(480,10),pady=(0,40))
-roomtabLabel=customtkinter.CTkLabel(bookingWindow,text="ROOMS",font=("Helvetica",24),fg_color="transparent")
-roomtabLabel.grid(row=0,column=2,padx=10,pady=(0,40))
-abouttabLabel=customtkinter.CTkLabel(bookingWindow,text="ABOUT US",font=("Helvetica",24),fg_color="transparent")
-abouttabLabel.grid(row=0,column=3,padx=10,pady=(0,40))
-contacttabLabel=customtkinter.CTkLabel(bookingWindow,text="CONTACT",font=("Helvetica",24),fg_color="transparent")
-contacttabLabel.grid(row=0,column=4,padx=10,pady=(0,40))
-detailstabLabel=customtkinter.CTkLabel(bookingWindow,text="DETAILS",font=("Helvetica",24),fg_color="transparent")
-detailstabLabel.grid(row=0,column=5,padx=10,pady=(0,40))
-
 
 bookingFrame=customtkinter.CTkScrollableFrame(bookingWindow,
                                               corner_radius=10,
@@ -43,120 +29,109 @@ bookingFrame=customtkinter.CTkScrollableFrame(bookingWindow,
                                               scrollbar_button_hover_color="#5C5C5C",)
 bookingFrame.grid(row=1,column=0,columnspan=6,padx=(100,0),pady=(60,0))
 
-book1=customtkinter.CTkFrame(bookingFrame,width=30,height=60,fg_color="#D9D9D9")
-book1.grid(row=0,column=0,padx=(70,20),pady=20)
 
+class Admin():
+    def __init__(self, parent, f_name, l_name, username, address, email, number, check_in_date, check_out_date, n_guest, payment):
+        self.adminFrame = customtkinter.CTkFrame(parent, width=30, height=60, fg_color="#D9D9D9")
+        self.adminFrame.grid(row=0, column=0, padx=(70,20), pady=20)
 
+        self.create_label("First Name :", f_name, 0)
+        self.create_label("Last Name :", l_name, 1)
+        self.create_label("Username :", username, 2)
+        self.create_label("Address :", address, 3)
+        self.create_label("Email :", email, 4)
+        self.create_label("Phone Number :", number, 5)
+        self.create_label("Check-in Date :", check_in_date, 6)
+        self.create_label("Check-out Date :", check_out_date, 7)
+        self.create_label("Number of Guests :", n_guest, 8)
+        self.create_label("Payment :", payment, 9)
 
-userLabel=customtkinter.CTkLabel(book1,text="First Name",text_color="black")
-userLabel.grid(row=0,column=0,padx=(50,10))
+        self.bookingButton = customtkinter.CTkButton(self.adminFrame, text="CANCEL",
+                                                     font=("arial", 18, "bold"),
+                                                     corner_radius=10,
+                                                     height=30,
+                                                     width=40,
+                                                     text_color="white",
+                                                     fg_color="#C95617",
+                                                     hover_color="#b34e17",
+                                                     command=self.cancel)
+        self.bookingButton.grid(row=10, column=0, columnspan=2, pady=20)
 
+        self.editButton = customtkinter.CTkButton(self.adminFrame, text="EDIT",
+                                                  font=("arial", 18, "bold"),
+                                                  corner_radius=10,
+                                                  height=30,
+                                                  width=40,
+                                                  text_color="white",
+                                                  fg_color="#B7D5B5",
+                                                  hover_color="#94bf91",
+                                                  cursor="hand2")
+        self.editButton.grid(row=10, column=1, columnspan=5, pady=20, padx=20)
 
-user1Label=customtkinter.CTkLabel(book1,text_color="black",text="Last Name")
-user1Label.grid(row=1,column=0,padx=(50,10))
+    def create_label(self, label_text, info_text, row):
+        label = customtkinter.CTkLabel(self.adminFrame, text=label_text, text_color="black")
+        label.grid(row=row, column=0, padx=(50, 10))
+        info = customtkinter.CTkLabel(self.adminFrame, text=info_text, text_color="black")
+        info.grid(row=row, column=1)
 
-usernameLabel=customtkinter.CTkLabel(book1,text_color="black",text="Username")
-usernameLabel.grid(row=2,column=0,padx=(50,10))
-
-addressLabel=customtkinter.CTkLabel(book1,text_color="black",text="Address")
-addressLabel.grid(row=3,column=0,padx=(50,10))
-
-
-emailLabel=customtkinter.CTkLabel(book1,text_color="black",text="Email")
-emailLabel.grid(row=4,column=0,padx=(50,10),)
-
-
-
-
-
-
-numberLabel=customtkinter.CTkLabel(book1,text_color="black",text="Phone Number")
-numberLabel.grid(row=5,column=0,padx=(50,10))
-
-
-numberLabel=customtkinter.CTkLabel(book1,text_color="black",text="check-in-date")
-numberLabel.grid(row=6,column=0,padx=(50,10))
-
-numberLabel=customtkinter.CTkLabel(book1,text_color="black",text="check-out-date")
-numberLabel.grid(row=7,column=0,padx=(50,10))
-
-numberLabel=customtkinter.CTkLabel(book1,text_color="black",text="Number of guests")
-numberLabel.grid(row=8,column=0,padx=(50,10))
-
-paymentLabel=customtkinter.CTkLabel(book1,text="Payment",text_color="black")
-paymentLabel.grid(row=9,column=0,padx=(50,10))
-
-
-bookingButton=customtkinter.CTkButton(book1,text="CANCEL",
-                                              font=("arial",18,"bold"),
-                                              corner_radius=10,
-                                              height=30,
-                                              width=40,
-                                              text_color="white",
-                                              fg_color="#C95617",
-                                              command=cancel
-                                              )
-bookingButton.grid(row=10,column=0,columnspan=2,pady=20)
-
-
-#########
-book2=customtkinter.CTkFrame(bookingFrame,width=30,height=60,fg_color="#D9D9D9")
-book2.grid(row=1,column=0,padx=(70,20),pady=20)
-
-
-
-userLabel=customtkinter.CTkLabel(book2,text="First Name",text_color="black")
-userLabel.grid(row=0,column=0,padx=(50,10))
-
-
-user1Label=customtkinter.CTkLabel(book2,text_color="black",text="Last Name")
-user1Label.grid(row=1,column=0,padx=(50,10))
-
-usernameLabel=customtkinter.CTkLabel(book2,text_color="black",text="Username")
-usernameLabel.grid(row=2,column=0,padx=(50,10))
-
-addressLabel=customtkinter.CTkLabel(book2,text_color="black",text="Address")
-addressLabel.grid(row=3,column=0,padx=(50,10))
-
-
-emailLabel=customtkinter.CTkLabel(book2,text_color="black",text="Email")
-emailLabel.grid(row=4,column=0,padx=(50,10),)
-
-
-
-
-
-
-numberLabel=customtkinter.CTkLabel(book2,text_color="black",text="Phone Number")
-numberLabel.grid(row=5,column=0,padx=(50,10))
-
-
-numberLabel=customtkinter.CTkLabel(book2,text_color="black",text="check-in-date")
-numberLabel.grid(row=6,column=0,padx=(50,10))
-
-numberLabel=customtkinter.CTkLabel(book2,text_color="black",text="check-out-date")
-numberLabel.grid(row=7,column=0,padx=(50,10))
-
-numberLabel=customtkinter.CTkLabel(book2,text_color="black",text="Number of guests")
-numberLabel.grid(row=8,column=0,padx=(50,10))
-
-paymentLabel=customtkinter.CTkLabel(book2,text="Payment",text_color="black")
-paymentLabel.grid(row=9,column=0,padx=(50,10))
-
-
-bookingButton=customtkinter.CTkButton(book2,text="CANCEL",
-                                              font=("arial",18,"bold"),
-                                              corner_radius=10,
-                                              height=30,
-                                              width=40,
-                                              text_color="white",
-                                              fg_color="#C95617",
-                                              command=cancel
-                                              )
-bookingButton.grid(row=10,column=0,columnspan=2,pady=20)
-
-
-
-      
-
+    def cancel(self):
+        print("Cancel button pressed")
+        
+users = [
+    {"First": "sumit", "Last": "magar", "username": "sumit", "address": "surkhet", "email": "sumit@gmail.com", "number": "9833343347", "check_in_date": "08/12/2025", "check_out_date": "08/12/2025", "n_guest": "2", "payment":"Done"}
+]
 bookingWindow.mainloop()
+
+# import customtkinter
+# from tkinter import messagebox
+# import sqlite3
+
+# class Admin:
+#     def __init__(self, parent, booking_id):
+#         self.booking_id = booking_id
+#         self.adminFrame = customtkinter.CTkFrame(parent, width=30, height=60, fg_color="#D9D9D9")
+#         self.adminFrame.grid(row=0, column=0, padx=(70,20), pady=20)
+
+#         self.load_data()
+
+#     def load_data(self):
+#         conn = sqlite3.connect('users.db')
+#         cursor = conn.cursor()
+#         cursor.execute("SELECT * FROM bookings WHERE id=?", (self.booking_id,))
+#         booking = cursor.fetchone()
+
+#         if booking:
+#             self.create_label("First Name :", booking[1], 0)
+#             self.create_label("Last Name :", booking[2], 1)
+#             self.create_label("Username :", booking[3], 2)
+#             self.create_label("Address :", booking[4], 3)
+#             self.create_label("Email :", booking[5], 4)
+#             self.create_label("Phone Number :", booking[6], 5)
+#             self.create_label("Check-in Date :", booking[7], 6)
+#             self.create_label("Check-out Date :", booking[8], 7)
+#             self.create_label("Number of Guests :", booking[9], 8)
+#             self.create_label("Payment :", booking[10], 9)
+
+#             self.bookingButton = customtkinter.CTkButton(self.adminFrame, text="CANCEL",
+#                                                          font=("arial", 18, "bold"),
+#                                                          corner_radius=10,
+#                                                          height=30,
+#                                                          width=40,
+#                                                          text_color="white",
+#                                                          fg_color="#C95617",
+#                                                          hover_color="#b34e17",
+#                                                          command=self.cancel)
+#             self.bookingButton.grid(row=10, column=0, columnspan=2, pady=20)
+
+#             self.editButton = customtkinter.CTkButton(self.adminFrame, text="EDIT",
+#                                                       font=("arial", 18, "bold"),
+#                                                       corner_radius=10,
+#                                                       height=30,
+#                                                       width=40,
+#                                                       text_color="white",
+#                                                       fg_color="#B7D5B5",
+#                                                       hover_color="#94bf91",
+#                                                       cursor="hand2")
+#             self.editButton.grid(row=10, column=1, columnspan=5, pady=20, padx=20)
+#         else:
+#             messagebox.showerror("Error", "No booking found with the provided ID.")

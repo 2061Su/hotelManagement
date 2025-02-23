@@ -7,7 +7,7 @@ def fpassword():
   fpasswordWindow.title("Forget Password ")
   fpasswordWindow.geometry("800x600")
 
-  fpasswordFrame=customtkinter.CTkFrame(fpasswordWindow,corner_radius=10)
+  fpasswordFrame=customtkinter.CTkFrame(fpasswordWindow,corner_radius=10,fg_color="#5c364b")
   fpasswordFrame.grid(row=0,column=0,padx=(100,0),pady=(100,0))
 
   usernameLabel=customtkinter.CTkLabel(fpasswordFrame,text="Username")
@@ -68,5 +68,6 @@ def fpassword():
                                                 width=40,
                                                 cursor="hand1",
                                                 fg_color="#B7D5B5",
+                                                hover_color="#94bf91",
                                                 command=fpasswordButton,)
   rpasswordButton.grid(row=4,column=1,padx=(0,190),pady=20)

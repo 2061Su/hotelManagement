@@ -23,8 +23,12 @@ class HomePage(customtkinter.CTk):
               self.mainloop()
        def mainPage(self):
               homeTab = customtkinter.CTkTabview(self, width=1450, height=1200,
-                                   segmented_button_selected_color="#7e8282",
-                                   segmented_button_selected_hover_color="#626363",
+                                   fg_color="#5c364b",
+                                   segmented_button_fg_color="#5c364b",
+                                   segmented_button_selected_color="#4a2c3c",
+                                   segmented_button_selected_hover_color="#6b3b54",
+                                   segmented_button_unselected_color="#6b3b54",
+                                   segmented_button_unselected_hover_color="#70425a",
                                    anchor="e")
               homeTab.grid(row=0, column=0, padx=(0, 200))
 
@@ -50,7 +54,15 @@ class HomePage(customtkinter.CTk):
               menu=["Log Out","Admin"]
               
              
-              my_option=customtkinter.CTkComboBox(home,values=menu,width=90,command=self.nav)
+              my_option=customtkinter.CTkComboBox(home,
+                                                  values=menu,
+                                                  width=90,
+                                                  fg_color="#4a2c3c",
+                                                  corner_radius=10,
+                                                  button_color="#36212c",
+                                                  button_hover_color="#6b3b54",
+                                                  dropdown_hover_color="#6b3b54",
+                                                  command=self.nav)
               my_option.set("Option")
               my_option.grid(row=0,column=0,columnspan=50,padx=(1320,0),pady=(0,120))
 
@@ -89,8 +101,10 @@ class HomePage(customtkinter.CTk):
                                                         height=450,
                                                         label_text="AfnaiGhar",
                                                         label_font=("Comic Sans MS",38,"bold"),
+                                                        label_fg_color="#704d0b",
+                                                        fg_color="#604b70",
                                                         scrollbar_button_color="gray",
-                                                        scrollbar_button_hover_color="#5C5C5C")
+                                                        scrollbar_button_hover_color="gray")
               bookingFrame.grid(row=1,column=1,columnspan=6,padx=(0,20),pady=(80,0))
               
 
@@ -98,11 +112,11 @@ class HomePage(customtkinter.CTk):
                      def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column):
 
                             # room 1  frame
-                            self.frame=customtkinter.CTkFrame(parent,width=30,height=60,fg_color="white")
+                            self.frame=customtkinter.CTkFrame(parent,width=30,height=60,fg_color="white",border_color="#db7209",border_width=2)
                             self.frame.grid(row=row,column=column,padx=(70,20),pady=20)
 
                             self.room_image = customtkinter.CTkImage(light_image=Image.open(image_path), dark_image=Image.open(image_path), size=(300, 200))
-                            self.photo = customtkinter.CTkLabel(self.frame, image=self.room_image)
+                            self.photo = customtkinter.CTkLabel(self.frame,text="", image=self.room_image)
                             self.photo.grid(row=0, column=0, padx=10,pady=10 )
                             self.photo.image = self.room_image
 
@@ -112,8 +126,11 @@ class HomePage(customtkinter.CTk):
                             self.label.grid(row=1,column=0,padx=(0,225))
                             self.label1=customtkinter.CTkLabel(self.frame,text=f"Room no.{room_number}",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#788B8B")
                             self.label1.grid(row=2,column=0,padx=(0,220))
+                            
                             self.label2=customtkinter.CTkLabel(self.frame,text=f"{room_type}",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#948E3C")
                             self.label2.grid(row=3,column=0,padx=(0,200),pady=5)
+                            self.label3=customtkinter.CTkLabel(self.frame,text=f"Available",font=("Helvetica",13,),fg_color="transparent",text_color="#B7D5B5")
+                            self.label3.grid(row=2,column=0,padx=(240,0),pady=5)
                             # 
 
 
@@ -173,23 +190,23 @@ class HomePage(customtkinter.CTk):
               aboutLabel = customtkinter.CTkLabel(about, text="About Us", font=("Sitka Banner Semibold", 96, "bold"), text_color="white", fg_color="transparent")
               aboutLabel.grid(row=1, column=1,padx=(250,0))
 
-              successFrame = customtkinter.CTkFrame(about)
-              successFrame.grid(row=2, column=0,columnspan=6)
+              successLabel = customtkinter.CTkLabel(about, text="Behind The Success", font=("Sitka Banner Semibold", 34, "bold"), text_color="#f7a305", fg_color="transparent")
+              successLabel.grid(row=2, column=1,padx=(250,0) )
 
-              successLabel = customtkinter.CTkLabel(successFrame, text="Behind The Success", font=("Sitka Banner Semibold", 64, "bold"), text_color="#5C5C5C", fg_color="transparent")
-              successLabel.grid(row=0, column=0, padx=(160, 0), pady=(100, 0))
-
-              success=customtkinter.CTkLabel(successFrame, 
-                                          text="""     Our hotel stands out with exceptional customer service, 
-                                   luxurious yet affordable accommodations, and a prime location that 
-                            ensures convenience for guests. We prioritize guest satisfaction 
-                                          with personalized experiences and top-tier amenities. Our commitment 
-                                                 to excellence and innovation makes us the preferred choice over other hotels.""", 
+              success=customtkinter.CTkLabel(about, 
+                                          text="""                                                                 Our hotel stands out with exceptional customer service, 
+                                                                                    luxurious yet affordable accommodations, and a prime location that 
+                                                                             ensures convenience for guests. We prioritize guest satisfaction 
+                                                                                           with personalized experiences and top-tier amenities. Our commitment 
+                                                                                                  to excellence and innovation makes us the preferred choice over other hotels.""", 
                                           font=("Helvetica", 18),
-                                          text_color="#6B6B6B", 
+                                          text_color="#b0883a", 
                                           fg_color="transparent",
                                           anchor="w")
-              success.grid(row=1, column=0, )
+              success.grid(row=3, column=0,columnspan=20 ,pady=50)
+              photoLabel= customtkinter.CTkLabel(about,text="",corner_radius=50)
+              photoLabel.grid(row=4, column=1, )
+
 
 
        ########################history####################
@@ -205,110 +222,115 @@ class HomePage(customtkinter.CTk):
               historyFrame=customtkinter.CTkScrollableFrame(history,corner_radius=10,fg_color="white",width=600)
               historyFrame.grid(row=1,column=1,padx=(100,0),pady=(100,0))
 
-              # title
-              historyLabel=customtkinter.CTkLabel(historyFrame,
-                                                 text="Your booked history",
-                                                 font=("Helvetica",20,"bold"),
-                                                 text_color="black",
-                                                 corner_radius=10,)
-              historyLabel.grid(row=0,column=0,padx=10,pady=10)
+              
               
 
               # history Frame
-              bookhistory=customtkinter.CTkFrame(historyFrame,
-                                                 corner_radius=10,
-                                                 fg_color="#D9D9D9",)
-              bookhistory.grid(row=1,column=0)
-              
+              class History:
+                     def __init__(self,parent):
+                            # title
+                            self.historyLabel=customtkinter.CTkLabel(parent,
+                                                               text="Your booked history",
+                                                               font=("Helvetica",20,"bold"),
+                                                               text_color="black",
+                                                               corner_radius=10,)
+                            self.historyLabel.grid(row=0,column=0,padx=10,pady=10)
+                            self.bookhistory=customtkinter.CTkFrame(parent,
+                                                               corner_radius=10,
+                                                               fg_color="#D9D9D9",)
+                            self.bookhistory.grid(row=1,column=0)
+                            
 
-              # id
-              uniqueId=customtkinter.CTkLabel(bookhistory,
-                                          text="Id : ",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              uniqueId.grid(row=0,column=0,padx=(10,0),pady=10)
-              uniqueId=customtkinter.CTkLabel(bookhistory,
-                                          text="00",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              uniqueId.grid(row=0,column=1)
+                            # id
+                            self.uniqueId=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="Id : ",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.uniqueId.grid(row=0,column=0,padx=(10,0),pady=10)
+                            self.uniqueId=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="00",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.uniqueId.grid(row=0,column=1)
 
-              # name
-              name=customtkinter.CTkLabel(bookhistory,
-                                          text="sumit",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              name.grid(row=0,column=2,padx=30,pady=10)
-
-
-              #check-in-date
-              checkIn=customtkinter.CTkLabel(bookhistory,
-                                          text="check-in-date :",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              checkIn.grid(row=0,column=4,pady=10)
-              checkInD=customtkinter.CTkLabel(bookhistory,
-                                          text="00/00/00",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              checkInD.grid(row=0,column=5,pady=10,padx=(0,30))
-              # Date book
-              book=customtkinter.CTkLabel(bookhistory,
-                                          text="Date book:",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              book.grid(row=1,column=0,padx=(10,0),pady=10)
-
-              bookDate=customtkinter.CTkLabel(bookhistory,
-                                          text="00/00/00",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              bookDate.grid(row=1,column=1,pady=10)
-
-              # room no
-              room=customtkinter.CTkLabel(bookhistory,
-                                          text="room no :",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              room.grid(row=1,column=2,padx=(30,0),pady=10)
-              roomN=customtkinter.CTkLabel(bookhistory,
-                                          text=" 00 ",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              roomN.grid(row=1,column=3,padx=(0,10),pady=10)
+                            # name
+                            self.name=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="sumit",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.name.grid(row=0,column=2,padx=30,pady=10)
 
 
-              # check-out-date
-              checkOut=customtkinter.CTkLabel(bookhistory,
-                                          text="check-out-date : ",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              checkOut.grid(row=1,column=4,pady=10)
-              checkOutD=customtkinter.CTkLabel(bookhistory,
-                                          text="00/00/00",
-                                          font=("Helvetica",20),
-                                          text_color="black",)
-              checkOutD.grid(row=1,column=5,pady=10,padx=(0,30))
-              
-              #status
-              scheduledD=customtkinter.CTkLabel(bookhistory,
-                                          text="Booked",
-                                          font=("Helvetica",12),
-                                          text_color="#218200",)
-              scheduledD.grid(row=2,column=5,)
+                            #check-in-date
+                            self.checkIn=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="check-in-date :",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.checkIn.grid(row=0,column=4,pady=10)
+                            self.checkInD=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="00/00/00",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.checkInD.grid(row=0,column=5,pady=10,padx=(0,30))
+                            # Date book
+                            self.book=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="Date book:",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.book.grid(row=1,column=0,padx=(10,0),pady=10)
 
-              def update():
-                     app=BookingWindow()
+                            self.bookDate=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="00/00/00",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.bookDate.grid(row=1,column=1,pady=10)
 
-              update=customtkinter.CTkButton(bookhistory,
-                                          text="update",
-                                          font=("Helvetica",12),
-                                          text_color="white",
-                                          width=40,
-                                          fg_color="#1CCB0C",
-                                          command=update
-                                          )
-              update.grid(row=2,column=4,padx=(40,0))
+                            # room no
+                            self.room=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="room no :",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.room.grid(row=1,column=2,padx=(30,0),pady=10)
+                            self.roomN=customtkinter.CTkLabel(self.bookhistory,
+                                                        text=" 00 ",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.roomN.grid(row=1,column=3,padx=(0,10),pady=10)
+
+
+                            # check-out-date
+                            self.checkOut=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="check-out-date : ",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.checkOut.grid(row=1,column=4,pady=10)
+                            self.checkOutD=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="00/00/00",
+                                                        font=("Helvetica",20),
+                                                        text_color="black",)
+                            self.checkOutD.grid(row=1,column=5,pady=10,padx=(0,30))
+                            
+                            #status
+                            self.scheduledD=customtkinter.CTkLabel(self.bookhistory,
+                                                        text="Booked",
+                                                        font=("Helvetica",12),
+                                                        text_color="#218200",)
+                            self.scheduledD.grid(row=2,column=5,)
+
+                     
+
+                            self.update=customtkinter.CTkButton(self.bookhistory,
+                                                        text="update",
+                                                        font=("Helvetica",12),
+                                                        text_color="white",
+                                                        width=40,
+                                                        fg_color="#1CCB0C",
+                                                        command=self.update
+                                                        )
+                            self.update.grid(row=2,column=4,padx=(40,0))
+
+                     def update():
+                            app=BookingWindow()
 
 
 
