@@ -6,6 +6,7 @@ import sqlite3
 import ttkbootstrap as tb
 from ttkbootstrap.icons import Icon
 from appointment import BookingWindow
+import testing
 
 
 
@@ -46,14 +47,11 @@ class HomePage(customtkinter.CTk):
        def home_widgets(self,home):
               homeTitle = customtkinter.CTkLabel(home, text="AfnaiGhar", font=("Comic Sans MS", 48, "bold"), text_color="white", fg_color="transparent")
               homeTitle.grid(row=0, column=0, padx=40, pady=40,)
-              
-
-              def nav():
-                     pass
-                     
               menu=["Log Out","Admin"]
-
-              my_option=customtkinter.CTkComboBox(home,values=menu,width=90,command=nav)
+              
+             
+              my_option=customtkinter.CTkComboBox(home,values=menu,width=90,command=self.nav)
+              my_option.set("Option")
               my_option.grid(row=0,column=0,columnspan=50,padx=(1320,0),pady=(0,120))
 
 
@@ -63,6 +61,22 @@ class HomePage(customtkinter.CTk):
 
               textLabel = customtkinter.CTkLabel(home, text="YOUR ROOM, YOUR STAY", font=("Helvetica", 24), text_color="white", fg_color="transparent")
               textLabel.grid(row=2, column=0, columnspan=6,padx=(350,0))
+              
+
+       def nav(self,selection):
+              if selection == "Log Out":
+                     messagebox.showinfo(title="Successfully Logged Out", message="You have successfully logged out!")
+                     self.schedule_transition_login()
+
+       def schedule_transition_login(self):
+              self.after(1000, self.transition_to_loginpage)  # Add a delay of 1000 milliseconds (1 second)
+
+       def transition_to_loginpage(self):
+              self.destroy()
+              testing.App().mainloop()
+                     
+                     
+       
 
               ################# rooms  ##############
 
@@ -71,56 +85,77 @@ class HomePage(customtkinter.CTk):
               homeTitle.grid(row=0, column=0, padx=40, pady=40)
 
               bookingFrame=customtkinter.CTkScrollableFrame(room,
-                                                        width=800,
-                                                        height=600,
+                                                        width=900,
+                                                        height=450,
                                                         label_text="AfnaiGhar",
                                                         label_font=("Comic Sans MS",38,"bold"),
                                                         scrollbar_button_color="gray",
                                                         scrollbar_button_hover_color="#5C5C5C")
-              bookingFrame.grid(row=1,column=1,columnspan=6,padx=(50,0),pady=(80,0))
-
-              # room 1  frame
-              room1Frame=customtkinter.CTkFrame(bookingFrame,width=30,height=60,fg_color="white")
-              room1Frame.grid(row=0,column=0,padx=(70,20),pady=20)
-
-              room1_image = customtkinter.CTkImage(light_image=Image.open("softwarica\\background.png"), dark_image=Image.open("softwarica\\background.png"), size=(300, 200))
-              photo = customtkinter.CTkLabel(room1Frame, image=room1_image)
-              photo.grid(row=0, column=0, padx=10,pady=10 )
-              photo.image = room1_image
-
-
-              # 
-              label=customtkinter.CTkLabel(room1Frame,text="Afnaighar",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#788B8B")
-              label.grid(row=1,column=0,padx=(0,225))
-              label1=customtkinter.CTkLabel(room1Frame,text="Room no.1",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#788B8B")
-              label1.grid(row=2,column=0,padx=(0,220))
-              label2=customtkinter.CTkLabel(room1Frame,text="Double Room",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#948E3C")
-              label2.grid(row=3,column=0,padx=(0,200),pady=5)
-              # 
-
-
-              roomP=customtkinter.CTkLabel(room1Frame,text="Rs 17,000",font=("Helvetica",14,"bold"),fg_color="transparent",text_color="#948E3C")
-              roomP.grid(row=4,column=0,padx=(200,0),pady=(0,30))
-              roomD=customtkinter.CTkLabel(room1Frame,text="per night",font=("Helvetica",8,"bold"),fg_color="transparent",text_color="#948E3C")
-              roomD.grid(row=4,column=0,padx=(200,0),pady=(10,0))
-
-
-
-              def bookNow():
-                     app = BookingWindow()
+              bookingFrame.grid(row=1,column=1,columnspan=6,padx=(0,20),pady=(80,0))
               
-              bookNow1=customtkinter.CTkButton(room1Frame,
-                                          text="BOOK NOW",
-                                          font=("Helvetica",18,"bold"),
-                                          fg_color="#B7D5B5",
-                                          text_color="white",
-                                          corner_radius=10,
-                                          width=60,
-                                          height=30,
-                                          
-                                          command=bookNow)
-              bookNow1.grid(row=4,column=0,padx=(0,170),pady=(10,30))
 
+              class RoomFrame:
+                     def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column):
+
+                            # room 1  frame
+                            self.frame=customtkinter.CTkFrame(parent,width=30,height=60,fg_color="white")
+                            self.frame.grid(row=row,column=column,padx=(70,20),pady=20)
+
+                            self.room_image = customtkinter.CTkImage(light_image=Image.open(image_path), dark_image=Image.open(image_path), size=(300, 200))
+                            self.photo = customtkinter.CTkLabel(self.frame, image=self.room_image)
+                            self.photo.grid(row=0, column=0, padx=10,pady=10 )
+                            self.photo.image = self.room_image
+
+
+                            # 
+                            self.label=customtkinter.CTkLabel(self.frame,text="Afnaighar",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#788B8B")
+                            self.label.grid(row=1,column=0,padx=(0,225))
+                            self.label1=customtkinter.CTkLabel(self.frame,text=f"Room no.{room_number}",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#788B8B")
+                            self.label1.grid(row=2,column=0,padx=(0,220))
+                            self.label2=customtkinter.CTkLabel(self.frame,text=f"{room_type}",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#948E3C")
+                            self.label2.grid(row=3,column=0,padx=(0,200),pady=5)
+                            # 
+
+
+                            self.roomP=customtkinter.CTkLabel(self.frame,text=f"Rs {price_per_night}",font=("Helvetica",14,"bold"),fg_color="transparent",text_color="#948E3C")
+                            self.roomP.grid(row=4,column=0,padx=(200,0),pady=(0,30))
+                            self.roomD=customtkinter.CTkLabel(self.frame,text="per night",font=("Helvetica",8,"bold"),fg_color="transparent",text_color="#948E3C")
+                            self.roomD.grid(row=4,column=0,padx=(200,0),pady=(10,0))
+                            self.bookNow1=customtkinter.CTkButton(self.frame,
+                                                        text="BOOK NOW",
+                                                        font=("Helvetica",18,"bold"),
+                                                        fg_color="#B7D5B5",
+                                                        text_color="white",
+                                                        corner_radius=10,
+                                                        width=60,
+                                                        height=30,
+                                                        command=self.book_now)
+                            self.bookNow1.grid(row=4,column=0,padx=(0,170),pady=(10,30))
+
+                     def book_now(self):
+                            app = BookingWindow()
+              def place_room_frames(parent, rooms):
+                     row = 0
+                     column = 0
+                     for room in rooms:
+                            RoomFrame(parent, room["number"], room["type"], room["price"], room["image_path"], row, column)
+                            column += 1
+                            if column == 2:  # Move to the next row after 2 columns
+                                   column = 0
+                                   row += 1
+
+
+              rooms = [
+                     {"number": 1, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png"},
+                     {"number": 2, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png"},
+                     {"number": 3, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png"},
+                     {"number": 4, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png"}
+              ]
+
+              # Place the room frames in the scrollable frame
+              place_room_frames(bookingFrame, rooms)
+
+              
 
 
 

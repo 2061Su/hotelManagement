@@ -90,7 +90,7 @@ class App(customtkinter.CTk):
 
   def transition_to_homepage(self):
       self.destroy()
-      homePage.HomePage()
+      homePage.HomePage().mainloop()
     # self.home_page = HomePage()
     # self.after_id=self.after(100, self.home_page.mainPage())
     
