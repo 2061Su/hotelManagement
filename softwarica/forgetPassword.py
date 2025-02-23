@@ -66,6 +66,7 @@ def fpassword():
                                                 corner_radius=10,
                                                 height=30,
                                                 width=40,
+                                                cursor="hand1",
                                                 fg_color="#B7D5B5",
                                                 command=fpasswordButton,)
   rpasswordButton.grid(row=4,column=1,padx=(0,190),pady=20)

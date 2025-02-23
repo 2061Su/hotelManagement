@@ -19,26 +19,21 @@ class HomePage(customtkinter.CTk):
               self.title("Afnaighar")
               self.geometry("1200x700")
               self.mainPage()
+              self.mainloop()
        def mainPage(self):
-              homeTab = customtkinter.CTkTabview(self, 
-                                                 width=1450, 
-                                                 height=1200,
-                                          #  segmented_button_fg_color="gray",
-                                                 segmented_button_selected_color="#7e8282",
-                                                 segmented_button_selected_hover_color="#626363",
-                                                 anchor="e")
-              homeTab.grid(row=0, column=0,padx=(0,200))
-
-
+              homeTab = customtkinter.CTkTabview(self, width=1450, height=1200,
+                                   segmented_button_selected_color="#7e8282",
+                                   segmented_button_selected_hover_color="#626363",
+                                   anchor="e")
+              homeTab.grid(row=0, column=0, padx=(0, 200))
 
               # Adding tabs
-
-              home=homeTab.add("HOME")
-              room=homeTab.add("ROOMS")
-              about=homeTab.add("ABOUT US")
-              contact=homeTab.add("CONTACT")
-              history=homeTab.add("HISTORY")
-              
+              home = homeTab.add("HOME")
+              room = homeTab.add("ROOMS")
+              about = homeTab.add("ABOUT US")
+              contact = homeTab.add("CONTACT")
+              history = homeTab.add("HISTORY")
+                     
               self.home_widgets(home)
               self.room_widgets(room)
               self.about_widgets(about)
@@ -283,5 +278,5 @@ class HomePage(customtkinter.CTk):
 
 
 if __name__ == "__main__":
-       homeWindow=HomePage()
-       homeWindow.mainloop()
+       HomePage()
+       

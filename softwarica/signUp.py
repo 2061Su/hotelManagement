@@ -114,6 +114,7 @@ def signup():
                                                 corner_radius=10,
                                                 height=30,
                                                 width=40,
+                                                cursor="hand1",
                                                 fg_color="#B7D5B5",
                                                 command=lambda : register_user(usernameEntry.get(),passwordEntry.get(),userEntry.get(),user1Entry.get(),numberEntry.get(),),)
   signupButton.grid(row=6,column=1,padx=(0,190),pady=20)
