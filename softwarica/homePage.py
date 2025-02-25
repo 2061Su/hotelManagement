@@ -5,8 +5,9 @@ from PIL import Image, ImageTk
 import sqlite3
 import ttkbootstrap as tb
 from ttkbootstrap.icons import Icon
-from appointment import BookingWindow
+
 import testing
+from adminlogin import adminLoginPage
 
 
 
@@ -22,7 +23,7 @@ class HomePage(customtkinter.CTk):
               self.mainPage()
               self.mainloop()
        def mainPage(self):
-              homeTab = customtkinter.CTkTabview(self, width=1450, height=1200,
+              self.homeTab = customtkinter.CTkTabview(self, width=1450, height=1200,
                                    fg_color="#5c364b",
                                    segmented_button_fg_color="#5c364b",
                                    segmented_button_selected_color="#4a2c3c",
@@ -30,28 +31,31 @@ class HomePage(customtkinter.CTk):
                                    segmented_button_unselected_color="#6b3b54",
                                    segmented_button_unselected_hover_color="#70425a",
                                    anchor="e")
-              homeTab.grid(row=0, column=0, padx=(0, 200))
+              self.homeTab.grid(row=0, column=0, padx=(0, 200))
 
               # Adding tabs
-              home = homeTab.add("HOME")
-              room = homeTab.add("ROOMS")
-              about = homeTab.add("ABOUT US")
-              contact = homeTab.add("CONTACT")
-              history = homeTab.add("HISTORY")
-                     
+              home = self.homeTab.add("HOME")
+              room = self.homeTab.add("ROOMS")
+              about = self.homeTab.add("ABOUT US")
+              contact = self.homeTab.add("CONTACT")
+              history = self.homeTab.add("HISTORY")
+
+              self.homeTab._segmented_button._buttons_dict["HISTORY"].bind("<Button-1>", self.on_history_tab_click)
               self.home_widgets(home)
               self.room_widgets(room)
               self.about_widgets(about)
-              self.history_widgets(history)
+              
+
 
 
               ######################home##################
               # Adding widgets to specific tabs in home
 
        def home_widgets(self,home):
+              
               homeTitle = customtkinter.CTkLabel(home, text="AfnaiGhar", font=("Comic Sans MS", 48, "bold"), text_color="white", fg_color="transparent")
               homeTitle.grid(row=0, column=0, padx=40, pady=40,)
-              menu=["Log Out","Admin"]
+              menu=["Log Out"]
               
              
               my_option=customtkinter.CTkComboBox(home,
@@ -77,14 +81,19 @@ class HomePage(customtkinter.CTk):
 
        def nav(self,selection):
               if selection == "Log Out":
-                     messagebox.showinfo(title="Successfully Logged Out", message="You have successfully logged out!")
-                     self.schedule_transition_login()
 
+                     result = messagebox.askquestion(title="Confirm Logout", message="Are you sure you want to log out?")
+            
+                     if result =="yes":
+                            messagebox.showinfo(title="Successfully Logged Out", message="You have successfully logged out!")
+                            self.schedule_transition_login()
+              
        def schedule_transition_login(self):
               self.after(1000, self.transition_to_loginpage)  # Add a delay of 1000 milliseconds (1 second)
 
        def transition_to_loginpage(self):
               self.destroy()
+              self.update()
               testing.App().mainloop()
                      
                      
@@ -97,7 +106,7 @@ class HomePage(customtkinter.CTk):
               homeTitle.grid(row=0, column=0, padx=40, pady=40)
 
               bookingFrame=customtkinter.CTkScrollableFrame(room,
-                                                        width=900,
+                                                        width=1400,
                                                         height=450,
                                                         label_text="AfnaiGhar",
                                                         label_font=("Comic Sans MS",38,"bold"),
@@ -105,15 +114,38 @@ class HomePage(customtkinter.CTk):
                                                         fg_color="#604b70",
                                                         scrollbar_button_color="gray",
                                                         scrollbar_button_hover_color="gray")
-              bookingFrame.grid(row=1,column=1,columnspan=6,padx=(0,20),pady=(80,0))
+              bookingFrame.grid(row=1,column=0,columnspan=70,padx=0,pady=(80,0))
               
 
+              # Define the function to get room status
+              def get_room_status(room_number):
+                     conn = sqlite3.connect('hotel_management_user.db')
+                     c = conn.cursor()
+                     
+                     # Fetch the status of the room from the database
+                     c.execute("SELECT status FROM rooms WHERE room_number = ?", (room_number,))
+                     status = c.fetchone()
+                     
+                     conn.close()
+              
+                     if status:
+                            return status[0]  # return the status if found (Booked or Available)
+                     return "Available"  # default to "Available" if no status found
+
+
               class RoomFrame:
-                     def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column):
+                     def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column,status):
+                            self.room_number = room_number
+                            self.room_type = room_type
+                            self.price_per_night = price_per_night
+                            self.image_path = image_path
+                            self.status = get_room_status(room_number)  # This keeps track of the current status
+
+                            self.status_text_color = "#B7D5B5" if status == "Available" else "red"
 
                             # room 1  frame
                             self.frame=customtkinter.CTkFrame(parent,width=30,height=60,fg_color="white",border_color="#db7209",border_width=2)
-                            self.frame.grid(row=row,column=column,padx=(70,20),pady=20)
+                            self.frame.grid(row=row,column=column,padx=(100,20),pady=20)
 
                             self.room_image = customtkinter.CTkImage(light_image=Image.open(image_path), dark_image=Image.open(image_path), size=(300, 200))
                             self.photo = customtkinter.CTkLabel(self.frame,text="", image=self.room_image)
@@ -129,7 +161,7 @@ class HomePage(customtkinter.CTk):
                             
                             self.label2=customtkinter.CTkLabel(self.frame,text=f"{room_type}",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#948E3C")
                             self.label2.grid(row=3,column=0,padx=(0,200),pady=5)
-                            self.label3=customtkinter.CTkLabel(self.frame,text=f"Available",font=("Helvetica",13,),fg_color="transparent",text_color="#B7D5B5")
+                            self.label3=customtkinter.CTkLabel(self.frame,text=f"{status}",font=("Helvetica",13,),fg_color="transparent",text_color=self.status_text_color)
                             self.label3.grid(row=2,column=0,padx=(240,0),pady=5)
                             # 
 
@@ -138,35 +170,74 @@ class HomePage(customtkinter.CTk):
                             self.roomP.grid(row=4,column=0,padx=(200,0),pady=(0,30))
                             self.roomD=customtkinter.CTkLabel(self.frame,text="per night",font=("Helvetica",8,"bold"),fg_color="transparent",text_color="#948E3C")
                             self.roomD.grid(row=4,column=0,padx=(200,0),pady=(10,0))
-                            self.bookNow1=customtkinter.CTkButton(self.frame,
-                                                        text="BOOK NOW",
-                                                        font=("Helvetica",18,"bold"),
-                                                        fg_color="#B7D5B5",
-                                                        text_color="white",
-                                                        corner_radius=10,
-                                                        width=60,
-                                                        height=30,
-                                                        command=self.book_now)
-                            self.bookNow1.grid(row=4,column=0,padx=(0,170),pady=(10,30))
 
-                     def book_now(self):
-                            app = BookingWindow()
+                            if self.status == "Available":
+                                   self.bookNow1 = customtkinter.CTkButton(self.frame, text="BOOK NOW", font=("Helvetica", 18, "bold"), fg_color="#B7D5B5", text_color="white", corner_radius=10, width=60, height=30, command=lambda: self.book_now(room_number))
+                                   self.bookNow1.grid(row=4, column=0, padx=(0, 170), pady=(10, 30))
+                            else:
+                                   self.bookNow1 = customtkinter.CTkButton(self.frame, text="BOOKED", font=("Helvetica", 18, "bold"), fg_color="#FF4D4D", text_color="white", corner_radius=10, width=60, height=30, state="disabled")
+                                   self.bookNow1.grid(row=4, column=0, padx=(0, 170), pady=(10, 30))
+                     
+                     def book_now(self, room_number):
+                            from appointment import BookingWindow
+                            app = BookingWindow(room_number, self.update_room_status)
+                            app.wait_window(app)
+                            self.update_room_status(room_number, "Booked")
+                            self.update_status()
+
+                     def update_room_status(self,room_number,status):
+                                   conn = sqlite3.connect('hotel_management_user.db')
+                                   c = conn.cursor()
+
+                                   # Update the status of the room in the database
+                                   c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", (status, room_number))
+                                   conn.commit()
+
+                                   conn.close()
+
+                     
+        
+                     def update_status(self):
+                            self.bookNow1.configure(text="BOOKED", fg_color="#FF4D4D", state="disabled")
+
+                            # Update the status label to "Booked" with red color
+                            self.label3.configure(text="Booked", text_color="red")                    
+
+              
+
               def place_room_frames(parent, rooms):
                      row = 0
                      column = 0
                      for room in rooms:
-                            RoomFrame(parent, room["number"], room["type"], room["price"], room["image_path"], row, column)
+                            RoomFrame(parent, room["room_number"], room["type"], room["price"], room["image_path"], row, column,room["status"])
                             column += 1
-                            if column == 2:  # Move to the next row after 2 columns
+                            if column == 3:  # Move to the next row after 2 columns
                                    column = 0
                                    row += 1
 
 
               rooms = [
-                     {"number": 1, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png"},
-                     {"number": 2, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png"},
-                     {"number": 3, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png"},
-                     {"number": 4, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png"}
+                     {"room_number": 1, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel.png","status":"Available"},
+                     {"room_number": 2, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel1.png","status":"Available"},
+                     {"room_number": 3, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel2.png","status":"Available"},
+                     {"room_number": 4, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
+                     {"room_number": 5, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel4.png","status":"Available"},
+                     {"room_number": 6, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
+                     {"room_number": 7, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
+                     {"room_number": 8, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel7.png","status":"Available"},
+                     {"room_number": 9, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png","status":"Available"},
+                     {"room_number": 10, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel9.png","status":"Available"},
+                     {"room_number": 11, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel11.png","status":"Available"},
+                     {"room_number": 12, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
+                     {"room_number": 13, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png","status":"Available"},
+                     {"room_number": 14, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png","status":"Available"},
+                     {"room_number": 15, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
+                     {"room_number": 16, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
+                     {"room_number": 17, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png","status":"Available"},
+                     {"room_number": 18, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel7.png","status":"Available"},
+                     {"room_number": 19, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel.png","status":"Available"},
+                     {"room_number": 20, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
+                     {"room_number": 21, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
               ]
 
               # Place the room frames in the scrollable frame
@@ -211,127 +282,79 @@ class HomePage(customtkinter.CTk):
 
        ########################history####################
 
-
-
-
-       def history_widgets(self,history):
-              homeTitle = customtkinter.CTkLabel(history, text="AfnaiGhar", font=("Comic Sans MS", 48, "bold"), text_color="white", fg_color="transparent")
-              homeTitle.grid(row=0, column=0, padx=40, pady=40)
-
-              #history scrollableframe
-              historyFrame=customtkinter.CTkScrollableFrame(history,corner_radius=10,fg_color="white",width=600)
-              historyFrame.grid(row=1,column=1,padx=(100,0),pady=(100,0))
-
+       
               
-              
+       def on_history_tab_click(self, event):
+              """ Authenticate admin before showing the History tab """
+              adminLoginPage(self.show_history_tab)
 
-              # history Frame
+       def show_history_tab(self):
+              """ Show History widgets after successful login """
+              self.history_widgets(self.homeTab.tab("HISTORY"))
+       def history_widgets(self, history):
               class History:
-                     def __init__(self,parent):
-                            # title
-                            self.historyLabel=customtkinter.CTkLabel(parent,
-                                                               text="Your booked history",
-                                                               font=("Helvetica",20,"bold"),
-                                                               text_color="black",
-                                                               corner_radius=10,)
-                            self.historyLabel.grid(row=0,column=0,padx=10,pady=10)
-                            self.bookhistory=customtkinter.CTkFrame(parent,
-                                                               corner_radius=10,
-                                                               fg_color="#D9D9D9",)
-                            self.bookhistory.grid(row=1,column=0)
-                            
+                     def __init__(self, parent):
+                            self.parent = parent
+                            self.scrollable_frame = customtkinter.CTkScrollableFrame(self.parent, corner_radius=10, fg_color="white", width=1000,height=600)
+                            self.scrollable_frame.grid(row=0, column=0, padx=20, pady=20)
 
-                            # id
-                            self.uniqueId=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="Id : ",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.uniqueId.grid(row=0,column=0,padx=(10,0),pady=10)
-                            self.uniqueId=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="00",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.uniqueId.grid(row=0,column=1)
+                     def load_booking_history(self):
+                           
+                            for widget in self.scrollable_frame.winfo_children():
+                                   widget.destroy()
 
-                            # name
-                            self.name=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="sumit",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.name.grid(row=0,column=2,padx=30,pady=10)
+                            conn = sqlite3.connect('hotel_management_user.db')
+                            c = conn.cursor()
+                            c.execute("""SELECT id, room_number, first_name, last_name, checkin_date, checkout_date
+                                          FROM bookings""")
+                            result = c.fetchall()
+                            conn.close()
 
+                            for record in result:
+                                   booking_id, room_number, first_name, last_name, checkin_date, checkout_date = record
+                                   record_frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color="#D9D9D9")
+                                   record_frame.pack(padx=10, pady=5, fill='x')
 
-                            #check-in-date
-                            self.checkIn=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="check-in-date :",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.checkIn.grid(row=0,column=4,pady=10)
-                            self.checkInD=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="00/00/00",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.checkInD.grid(row=0,column=5,pady=10,padx=(0,30))
-                            # Date book
-                            self.book=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="Date book:",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.book.grid(row=1,column=0,padx=(10,0),pady=10)
+                                   uniqueId = customtkinter.CTkLabel(record_frame, text=f"Id: {booking_id}", font=("Helvetica", 20), text_color="black")
+                                   uniqueId.grid(row=0, column=0, padx=(10, 0), pady=10)
 
-                            self.bookDate=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="00/00/00",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.bookDate.grid(row=1,column=1,pady=10)
+                                   name = customtkinter.CTkLabel(record_frame, text=f"{first_name} {last_name}", font=("Helvetica", 20), text_color="black")
+                                   name.grid(row=0, column=1, padx=30, pady=10)
 
-                            # room no
-                            self.room=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="room no :",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.room.grid(row=1,column=2,padx=(30,0),pady=10)
-                            self.roomN=customtkinter.CTkLabel(self.bookhistory,
-                                                        text=" 00 ",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.roomN.grid(row=1,column=3,padx=(0,10),pady=10)
+                                   checkIn = customtkinter.CTkLabel(record_frame, text="Check-in-date:", font=("Helvetica", 20), text_color="black")
+                                   checkIn.grid(row=0, column=2, pady=10)
+                                   checkInD = customtkinter.CTkLabel(record_frame, text=checkin_date, font=("Helvetica", 20), text_color="black")
+                                   checkInD.grid(row=0, column=3, pady=10, padx=(0, 30))
 
+                                   checkOut = customtkinter.CTkLabel(record_frame, text="Check-out-date:", font=("Helvetica", 20), text_color="black")
+                                   checkOut.grid(row=1, column=2, pady=10)
+                                   checkOutD = customtkinter.CTkLabel(record_frame, text=checkout_date, font=("Helvetica", 20), text_color="black")
+                                   checkOutD.grid(row=1, column=3, pady=10, padx=(0, 30))
 
-                            # check-out-date
-                            self.checkOut=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="check-out-date : ",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.checkOut.grid(row=1,column=4,pady=10)
-                            self.checkOutD=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="00/00/00",
-                                                        font=("Helvetica",20),
-                                                        text_color="black",)
-                            self.checkOutD.grid(row=1,column=5,pady=10,padx=(0,30))
-                            
-                            #status
-                            self.scheduledD=customtkinter.CTkLabel(self.bookhistory,
-                                                        text="Booked",
-                                                        font=("Helvetica",12),
-                                                        text_color="#218200",)
-                            self.scheduledD.grid(row=2,column=5,)
+                                   room = customtkinter.CTkLabel(record_frame, text="Room no:", font=("Helvetica", 20), text_color="black")
+                                   room.grid(row=1, column=0, padx=(30, 0), pady=10)
+                                   roomN = customtkinter.CTkLabel(record_frame, text=room_number, font=("Helvetica", 20), text_color="black")
+                                   roomN.grid(row=1, column=1, padx=(0, 10), pady=10)
 
-                     
+                                   book = customtkinter.CTkLabel(record_frame, text="Date booked:", font=("Helvetica", 20), text_color="black")
+                                   book.grid(row=2, column=0, padx=(10, 0), pady=10)
+                                   bookDate = customtkinter.CTkLabel(record_frame, text="00/00/00", font=("Helvetica", 20), text_color="black")
+                                   bookDate.grid(row=2, column=1, pady=10)
 
-                            self.update=customtkinter.CTkButton(self.bookhistory,
-                                                        text="update",
-                                                        font=("Helvetica",12),
-                                                        text_color="white",
-                                                        width=40,
-                                                        fg_color="#1CCB0C",
-                                                        command=self.update
-                                                        )
-                            self.update.grid(row=2,column=4,padx=(40,0))
+                                   scheduledD = customtkinter.CTkLabel(record_frame, text="Booked", font=("Helvetica", 12), text_color="#218200")
+                                   scheduledD.grid(row=2, column=3)
 
-                     def update():
-                            app=BookingWindow()
+                                   update = customtkinter.CTkButton(record_frame, text="Update", font=("Helvetica", 12), text_color="white", width=40, fg_color="#1CCB0C",command=lambda:reUpdate())
+                                   update.grid(row=2, column=2, padx=(40, 0))
 
+                     def update_booking(self, booking_id):
+                            # This method can be used to update the booking info if necessary
+                            app = BookingWindow(booking_id)
+                            app.mainloop()
+
+                     # Create an instance of the History class and load booking history
+              history_instance = History(history)
+              history_instance.load_booking_history()
 
 
 if __name__ == "__main__":

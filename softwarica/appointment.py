@@ -5,100 +5,170 @@ from PIL import Image, ImageTk
 import sqlite3
 
 
+
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 
+
 class BookingWindow(customtkinter.CTkToplevel):
-    def __init__(self,):
+    def __init__(self,room_number=None,booking_id=None,update_room_status=None):
         super().__init__()
+        self.booking_id = booking_id
+        self.room_number = room_number
+        self.update_room_status = update_room_status
         self.title("Afnaighar")
         self.geometry("600x700")
         self.resizable(False, False)
         self.create_widgets()
+        if self.booking_id:
+            self.prefill_booking_details()
+    
+    
 
-    def create_widgets(self):
+    def create_widgets(self,):
+        
         bookingFrame = customtkinter.CTkFrame(self, corner_radius=10, fg_color="white")
         bookingFrame.grid(row=0, column=0,padx=(70,0))
 
-        roomLabel = customtkinter.CTkLabel(bookingFrame, text="room no : 00", text_color="black", font=("Helvetica", 26, "bold"))
-        roomLabel.grid(row=0, column=0, columnspan=4)
+        self.roomLabel = customtkinter.CTkLabel(bookingFrame, text=f"room no :{self.room_number}", text_color="black", font=("Helvetica", 26, "bold"))
+        self.roomLabel.grid(row=0, column=0, columnspan=4)
         
         # First Name
-        userLabel = customtkinter.CTkLabel(bookingFrame, text="First Name", text_color="black")
-        userLabel.grid(row=1, column=0, padx=(50, 10))
-        userEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your firstname", width=200, height=30)
-        userEntry.grid(row=1, column=1, padx=(10, 60), pady=(20, 10))
+        self.userLabel = customtkinter.CTkLabel(bookingFrame, text="First Name", text_color="black")
+        self.userLabel.grid(row=1, column=0, padx=(50, 10))
+        self.userEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your firstname", width=200, height=30)
+        self.userEntry.grid(row=1, column=1, padx=(10, 60), pady=(20, 10))
 
         # Last Name
-        user1Label = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Last Name")
-        user1Label.grid(row=2, column=0, padx=(50, 10))
-        user1Entry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your lastname", width=200, height=30)
-        user1Entry.grid(row=2, column=1, padx=(10, 60), pady=10)
+        self.user1Label = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Last Name")
+        self.user1Label.grid(row=2, column=0, padx=(50, 10))
+        self.user1Entry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your lastname", width=200, height=30)
+        self.user1Entry.grid(row=2, column=1, padx=(10, 60), pady=10)
 
         # Username
-        usernameLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Username")
-        usernameLabel.grid(row=3, column=0, padx=(50, 10))
-        usernameEntry = customtkinter.CTkEntry(bookingFrame, width=200, height=30)
-        usernameEntry.grid(row=3, column=1, padx=(10, 60), pady=10)
+        self.usernameLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Username")
+        self.usernameLabel.grid(row=3, column=0, padx=(50, 10))
+        self.usernameEntry = customtkinter.CTkEntry(bookingFrame, width=200, height=30)
+        self.usernameEntry.grid(row=3, column=1, padx=(10, 60), pady=10)
 
         # Address
-        addressLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Address")
-        addressLabel.grid(row=4, column=0, padx=(50, 10))
-        addressEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your address", width=200, height=30)
-        addressEntry.grid(row=4, column=1, padx=(10, 60), pady=10)
+        self.addressLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Address")
+        self.addressLabel.grid(row=4, column=0, padx=(50, 10))
+        self.addressEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your address", width=200, height=30)
+        self.addressEntry.grid(row=4, column=1, padx=(10, 60), pady=10)
 
         # Email
-        emailLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Email")
-        emailLabel.grid(row=5, column=0, padx=(50, 10))
-        emailEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your email", width=200, height=30)
-        emailEntry.grid(row=5, column=1, padx=(10, 60), pady=10)
+        self.emailLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Email")
+        self.emailLabel.grid(row=5, column=0, padx=(50, 10))
+        self.emailEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your email", width=200, height=30)
+        self.emailEntry.grid(row=5, column=1, padx=(10, 60), pady=10)
 
         # Phone Number
-        numberLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Phone Number")
-        numberLabel.grid(row=6, column=0, padx=(50, 10))
-        numberEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your number", width=200, height=30)
-        numberEntry.grid(row=6, column=1, padx=(10, 60), pady=10)
+        self.numberLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Phone Number")
+        self.numberLabel.grid(row=6, column=0, padx=(50, 10))
+        self.numberEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your number", width=200, height=30)
+        self.numberEntry.grid(row=6, column=1, padx=(10, 60), pady=10)
 
         # Check-in Date
-        checkinLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-in Date")
-        checkinLabel.grid(row=7, column=0, padx=(50, 10), pady=10)
-        checkinEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
-        checkinEntry.grid(row=7, column=1, padx=(10, 60), pady=10)
+        self.checkinLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-in Date")
+        self.checkinLabel.grid(row=7, column=0, padx=(50, 10), pady=10)
+        self.checkinEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
+        self.checkinEntry.grid(row=7, column=1, padx=(10, 60), pady=10)
 
         # Check-out Date
-        checkoutLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-out Date")
-        checkoutLabel.grid(row=8, column=0, padx=(50, 10), pady=10)
-        checkoutEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
-        checkoutEntry.grid(row=8, column=1, padx=(10, 60), pady=10)
+        self.checkoutLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-out Date")
+        self.checkoutLabel.grid(row=8, column=0, padx=(50, 10), pady=10)
+        self.checkoutEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
+        self.checkoutEntry.grid(row=8, column=1, padx=(10, 60), pady=10)
 
         # Number of Guests
-        guestsLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Number of Guests")
-        guestsLabel.grid(row=9, column=0, padx=(50, 10), pady=10)
-        guestsEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter number of guests", width=200, height=30)
-        guestsEntry.grid(row=9, column=1, padx=(10, 60), pady=10)
+        self.guestsLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Number of Guests")
+        self.guestsLabel.grid(row=9, column=0, padx=(50, 10), pady=10)
+        self.guestsEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter number of guests", width=200, height=30)
+        self.guestsEntry.grid(row=9, column=1, padx=(10, 60), pady=10)
 
         # Payment
-        paymentLabel = customtkinter.CTkLabel(bookingFrame, text="Payment", text_color="black")
-        paymentLabel.grid(row=10, column=0, padx=(50, 10), pady=10)
+        self.paymentLabel = customtkinter.CTkLabel(bookingFrame, text="Payment", text_color="black")
+        self.paymentLabel.grid(row=10, column=0, padx=(50, 10), pady=10)
         
         # Create a StringVar to hold the value of the selected payment option
-        payment_option = StringVar(value="Cash")
+        self.payment_option = StringVar(value="Cash")
 
         # Create and place the "Cash" radio button
-        radio_cash = customtkinter.CTkRadioButton(bookingFrame, text="Cash", variable=payment_option, value="Cash", )
-        radio_cash.grid(row=10,column=0,columnspan=2)
+        self.radio_cash = customtkinter.CTkRadioButton(bookingFrame, text="Cash", variable=self.payment_option, value="Cash", )
+        self.radio_cash.grid(row=10,column=0,columnspan=2)
 
         # Create and place the "eSewa" radio button
-        radio_esewa = customtkinter.CTkRadioButton(bookingFrame, text="eSewa", variable=payment_option, value="eSewa",)
-        radio_esewa.grid(row=10,column=1,columnspan=3)
+        self.radio_esewa = customtkinter.CTkRadioButton(bookingFrame, text="eSewa", variable=self.payment_option, value="eSewa",)
+        self.radio_esewa.grid(row=10,column=1,columnspan=3)
+        
 
+        
         # Book Button
         bookingButton = customtkinter.CTkButton(bookingFrame, text="Book", font=("arial", 20, "bold"), corner_radius=10, height=30, width=40, text_color="white", fg_color="#B7D5B5", command=self.book)
         bookingButton.grid(row=11, column=0, columnspan=3, pady=20)
 
+        booking_details = self.get_booking_details()
+
+    def prefill_booking_details(self):
+        conn = sqlite3.connect('hotel_management_user.db')
+        c = conn.cursor()
+        c.execute("SELECT room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment FROM bookings WHERE id = ?", (self.booking_id,))
+        details = c.fetchone()
+        conn.close()
+        if details:
+            (self.room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) = details
+            self.userEntry.insert(0, first_name)
+            self.user1Entry.insert(0, last_name)
+            self.usernameEntry.insert(0, username)
+            self.addressEntry.insert(0, address)
+            self.emailEntry.insert(0, email)
+            self.numberEntry.insert(0, phone_number)
+            self.checkinEntry.insert(0, checkin_date)
+            self.checkoutEntry.insert(0, checkout_date)
+            self.guestsEntry.insert(0, guests)
+            self.payment_option.set(payment)
+            self.roomLabel.configure(text=f"Room No: {self.room_number}")
+
+    def get_booking_details(self):
+        # Retrieve booking details by booking_id
+        conn = sqlite3.connect('hotel_management_user.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM bookings WHERE id = ?", (self.booking_id,))
+        details = c.fetchone()
+        conn.close()
+        return details
+
     def book(self):
-        messagebox.showinfo(title="Successfully Booked", message="You have successfully booked!")
-        self.destroy()
+        first_name = self.userEntry.get()
+        last_name = self.user1Entry.get()
+        username = self.usernameEntry.get()
+        address = self.addressEntry.get()
+        email = self.emailEntry.get()
+        phone_number = self.numberEntry.get()
+        checkin_date = self.checkinEntry.get()
+        checkout_date = self.checkoutEntry.get()
+        guests = self.guestsEntry.get()
+        payment = self.payment_option.get()
+        
+        if self.room_number and first_name and last_name and username and address and email and phone_number and checkin_date and checkout_date and guests:
+            conn = sqlite3.connect('hotel_management_user.db')
+            c = conn.cursor()
+            c.execute('''INSERT INTO bookings (room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (self.room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment))
+            conn.commit()
+            conn.close()
+
+            self.update_room_status(self.room_number, "Booked")
+
+            messagebox.showinfo(title="Successfully Booked", message="You have successfully booked!") 
+            self.destroy()
+            self.update()
+
+            
+        else:
+            messagebox.showerror(title="Error", message="Please fill in all the fields.")
+        
 
 

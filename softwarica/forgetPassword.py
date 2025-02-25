@@ -1,8 +1,12 @@
 from tkinter import *
 import customtkinter
 from tkinter import messagebox
+import sqlite3
+from signUp import signup
 
 def fpassword():
+
+
   fpasswordWindow=customtkinter.CTkToplevel()
   fpasswordWindow.title("Forget Password ")
   fpasswordWindow.geometry("800x600")
@@ -52,14 +56,6 @@ def fpassword():
   show1=customtkinter.CTkCheckBox(fpasswordFrame,text="Show",font=('arial',14),command=toggle_password)
   show1.grid(row=3,column=0,columnspan=2,padx=(550,0))
 
-  def fpasswordButton():
-    password= passwordEntry.get()
-    if 8 <= len(password) <= 15 and any(c.isupper() for c in password) and any(c.islower() for c in password) and any(c.isdigit() for c in password) and any(not c.isalnum() for c in password):
-      messagebox.showinfo(title="successfully changed password ",message="you have successfully changed your password.")
-      fpasswordWindow.destroy()
-    else:
-      messagebox.showinfo(title="password error ",message="""-Password must be at least 8 characters long.\n-Password must be no more than 15 characters long.\n-Password must contain at least one uppercase letter.\n-Password must contain at least one lowercase letter.\n-Password must contain at least one digit.\n-Password must contain at least one special character.""")
-
 
   rpasswordButton=customtkinter.CTkButton(fpasswordFrame,text="Confirm",
                                                 font=("arial",20,"bold"),
@@ -69,5 +65,38 @@ def fpassword():
                                                 cursor="hand1",
                                                 fg_color="#B7D5B5",
                                                 hover_color="#94bf91",
-                                                command=fpasswordButton,)
+                                                command=lambda :fpasswordButton(usernameEntry.get(),numberEntry.get(),passwordEntry.get()),)
   rpasswordButton.grid(row=4,column=1,padx=(0,190),pady=20)
+
+  def fpasswordButton(username,number,password):
+    try:
+      password= passwordEntry.get()
+
+      if 8 <= len(password) <= 15 and any(c.isupper() for c in password) and any(c.islower() for c in password) and any(c.isdigit() for c in password) and any(not c.isalnum() for c in password):
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        
+        # Get the list of users (username, phone_number)
+        users = signup()
+
+        # Check if the username and phone number match
+        cursor.execute("SELECT * FROM users WHERE username=? AND phone_number=?", (username, number))
+        user = cursor.fetchone()
+        
+        
+        if user:
+            # Update the password
+            cursor.execute("UPDATE users SET password=? WHERE username=? AND phone_number=?", (password, username, number))
+            conn.commit()
+            messagebox.showinfo(title="Password Changed", message="You have successfully changed your password.")
+            fpasswordWindow.destroy()
+            fpasswordWindow.update()
+        else:
+          messagebox.showinfo(title="invalid",message="incorrect username and phone number")
+      else:
+        messagebox.showinfo(title="password error ",message="""-Password must be at least 8 characters long.\n-Password must be no more than 15 characters long.\n-Password must contain at least one uppercase letter.\n-Password must contain at least one lowercase letter.\n-Password must contain at least one digit.\n-Password must contain at least one special character.""")
+    except Exception as e:
+      messagebox.showinfo(title="Error", message=f"An error occurred: {e}")
+    finally:
+      if conn:
+          conn.close()
