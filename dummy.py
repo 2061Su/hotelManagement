@@ -54,7 +54,9 @@ class App(customtkinter.CTk):
         self.signUpDesc = customtkinter.CTkLabel(self.loginFrame, text="If you are not registered", font=("arial", 12))
         self.signUpDesc.grid(row=4, column=1, padx=(0, 130), pady=30)
 
-    
+    def login(self):
+        self.homeP()
+
     def homeP(self):
         messagebox.showinfo(title="Successfully Logged In", message="You have successfully logged in.")
         self.destroy()
