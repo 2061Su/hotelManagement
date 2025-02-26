@@ -8,8 +8,7 @@ from ttkbootstrap.icons import Icon
 
 import testing
 from adminlogin import adminLoginPage
-
-
+from reservationUserDetails import show_reservation_details
 
 # customtkinter.set_appearance_mode("dark")
 # customtkinter.set_default_color_theme("dark-blue")
@@ -55,7 +54,7 @@ class HomePage(customtkinter.CTk):
               
               homeTitle = customtkinter.CTkLabel(home, text="AfnaiGhar", font=("Comic Sans MS", 48, "bold"), text_color="white", fg_color="transparent")
               homeTitle.grid(row=0, column=0, padx=40, pady=40,)
-              menu=["Log Out"]
+              menu=["Log Out","Reservation"]
               
              
               my_option=customtkinter.CTkComboBox(home,
@@ -87,6 +86,18 @@ class HomePage(customtkinter.CTk):
                      if result =="yes":
                             messagebox.showinfo(title="Successfully Logged Out", message="You have successfully logged out!")
                             self.schedule_transition_login()
+              if selection == "Reservation":
+
+                     pass
+       
+       def get_selected_booking_id(self):
+              # Assuming booking_list holds booking data
+              selected_item = self.dropdown.get()  # Get the selected value from dropdown
+              for record in self.booking_list:  
+                     if selected_item in record:  
+                            return record[0]  # Assuming booking_id is the first column in DB
+              return None
+
               
        def schedule_transition_login(self):
               self.after(1000, self.transition_to_loginpage)  # Add a delay of 1000 milliseconds (1 second)
@@ -101,15 +112,7 @@ class HomePage(customtkinter.CTk):
 
               ################# rooms  ##############
        
-       def update_room_status(self,room_number,status):
-                                   conn = sqlite3.connect('hotel_management_user.db')
-                                   c = conn.cursor()
-
-                                   # Update the status of the room in the database
-                                   c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", (status, room_number))
-                                   conn.commit()
-
-                                   conn.close()
+       
        def get_room_status(room_number):
                      conn = sqlite3.connect('hotel_management_user.db')
                      c = conn.cursor()
@@ -120,10 +123,7 @@ class HomePage(customtkinter.CTk):
                      
                      conn.close()
               
-                     if status:
-                            return status[0]  # return the status if found (Booked or Available)
-                     return "Available"  # default to "Available" if no status found
-
+                     
        
        
        def room_widgets(self,room):
@@ -145,12 +145,11 @@ class HomePage(customtkinter.CTk):
                      row = 0
                      column = 0
                      for room in rooms:
-                            RoomFrame(parent, room["room_number"], room["type"], room["price"], room["image_path"], row, column,room["status"],self.update_room_status)
+                            RoomFrame(parent, room["room_number"], room["type"], room["price"], room["image_path"], row, column,)
                             column += 1
-                            if column == 3:  # Move to the next row after 2 columns
+                            if column == 3:
                                    column = 0
                                    row += 1
-              # Define the function to get room status
               
               
 
@@ -158,16 +157,13 @@ class HomePage(customtkinter.CTk):
 
 
               class RoomFrame:
-                     def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column,status,update_room_status):
+                     def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column,):
                             self.room_number = room_number
                             self.room_type = room_type
                             self.price_per_night = price_per_night
                             self.image_path = image_path
-                            self.status = status
-                            self.update_room_status = update_room_status   # This keeps track of the current status
-                            # self.booking_id = self.get_booking_id(self.room_number)
-
-                            self.status_text_color = "#B7D5B5" if status == "Available" else "red"
+                            
+                            
 
                             # room 1  frame
                             self.frame=customtkinter.CTkFrame(parent,width=30,height=60,fg_color="white",border_color="#db7209",border_width=2)
@@ -187,7 +183,7 @@ class HomePage(customtkinter.CTk):
                             
                             self.label2=customtkinter.CTkLabel(self.frame,text=f"{room_type}",font=("Helvetica",15,"bold"),fg_color="transparent",text_color="#948E3C")
                             self.label2.grid(row=3,column=0,padx=(0,200),pady=5)
-                            self.label3=customtkinter.CTkLabel(self.frame,text=f"{status}",font=("Helvetica",13,),fg_color="transparent",text_color=self.status_text_color)
+                            self.label3=customtkinter.CTkLabel(self.frame,text="Available",font=("Helvetica",13,),fg_color="transparent",text_color="#B7D5B5")
                             self.label3.grid(row=2,column=0,padx=(240,0),pady=5)
                             # 
 
@@ -201,12 +197,12 @@ class HomePage(customtkinter.CTk):
 
                      
                      def get_booking_id(self, room_number):
-                            # Fetch the booking ID from the database if it exists
+                            
                             conn = sqlite3.connect('hotel_management_user.db')
                             c = conn.cursor()
 
                             # Assuming the bookings table has a column `room_number` and `booking_id`
-                            c.execute("SELECT booking_id FROM bookings WHERE room_number = ?", (room_number,))
+                            c.execute("SELECT id FROM bookings WHERE room_number = ?", (room_number,))
                             result = c.fetchone()
 
                             conn.close()
@@ -215,35 +211,17 @@ class HomePage(customtkinter.CTk):
                                 return result[0]  # Return the booking_id if found
                             return None  # No booking found for the room
                                           
-                     def refresh_ui(self):
-                            # Update the status of the room
-                            self.status = get_room_status(self.room_number)
-                            
-                            # Update the status label text and color
-                            new_status_text_color = "#B7D5B5" if self.status == "Available" else "red"
-                            self.label3.configure(text=self.status, text_color=new_status_text_color)
-                            
-                            # Update the button based on the new status
-                            if self.status == "Available":
-                                   self.bookNow1.configure(text="BOOK NOW", fg_color="#B7D5B5", state="normal", command=lambda: self.book_now(self.room_number))
-                            else:
-                                   self.bookNow1.configure(text="BOOKED", fg_color="#FF4D4D", state="disabled", command=None)
                      
                      def book_now(self, room_number):
                             from appointment import BookingWindow
-                             # Check if the room is available
-                            if self.status != "Available":
-                                   print(f"Room {self.room_number} is already booked.")
-                                   return  # Don't proceed if the room is already booked
-
-                            # Create a new booking for the room (insert a new record in the bookings table)
+                            
                             conn = sqlite3.connect('hotel_management_user.db')
                             c = conn.cursor()
                             
                             # Insert a new booking for the room (You can use room_number and other details)
                             c.execute("INSERT INTO bookings (room_number) VALUES (?)", (self.room_number,))
                             conn.commit()
-                            booking_id = c.lastrowid  # Get the ID of the newly inserted booking
+                            booking_id = c.lastrowid  
                             
                             conn.close()
                             
@@ -251,11 +229,11 @@ class HomePage(customtkinter.CTk):
                                    print(f"Booking successful for room {self.room_number}. Booking ID: {booking_id}")
                             else:
                                    print("Booking failed. Please try again.")
-                                   return  # Exit the method if booking failed
-                            app = BookingWindow(room_number, self.update_room_status, self.refresh_ui)
+                                   return 
+                            app = BookingWindow(room_number=room_number )
                             self.frame.wait_window(app)
-                            self.update_room_status(self.room_number, "Booked")
-                            self.refresh_ui()
+                            
+                            
 
                      
                     
@@ -266,30 +244,30 @@ class HomePage(customtkinter.CTk):
 
 
               rooms = [
-                     {"room_number": 1, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel.png","status":"Available"},
-                     {"room_number": 2, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel1.png","status":"Available"},
-                     {"room_number": 3, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel2.png","status":"Available"},
-                     {"room_number": 4, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
-                     {"room_number": 5, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel4.png","status":"Available"},
-                     {"room_number": 6, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
-                     {"room_number": 7, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
-                     {"room_number": 8, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel7.png","status":"Available"},
-                     {"room_number": 9, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png","status":"Available"},
-                     {"room_number": 10, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel9.png","status":"Available"},
-                     {"room_number": 11, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel11.png","status":"Available"},
-                     {"room_number": 12, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
-                     {"room_number": 13, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png","status":"Available"},
-                     {"room_number": 14, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png","status":"Available"},
-                     {"room_number": 15, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
-                     {"room_number": 16, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
-                     {"room_number": 17, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png","status":"Available"},
-                     {"room_number": 18, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel7.png","status":"Available"},
-                     {"room_number": 19, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel.png","status":"Available"},
-                     {"room_number": 20, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png","status":"Available"},
-                     {"room_number": 21, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel5.png","status":"Available"},
+                     {"room_number": 1, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel.png"},
+                     {"room_number": 2, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel1.png"},
+                     {"room_number": 3, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel2.png"},
+                     {"room_number": 4, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png"},
+                     {"room_number": 5, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel4.png"},
+                     {"room_number": 6, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel5.png"},
+                     {"room_number": 7, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png"},
+                     {"room_number": 8, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel7.png"},
+                     {"room_number": 9, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png"},
+                     {"room_number": 10, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel9.png"},
+                     {"room_number": 11, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel11.png"},
+                     {"room_number": 12, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png"},
+                     {"room_number": 13, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel8.png"},
+                     {"room_number": 14, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png"},
+                     {"room_number": 15, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel5.png"},
+                     {"room_number": 16, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png"},
+                     {"room_number": 17, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel12.png"},
+                     {"room_number": 18, "type": "Suite Room", "price": 25000, "image_path": "softwarica\\photo\\hotel7.png"},
+                     {"room_number": 19, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel.png"},
+                     {"room_number": 20, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel3.png"},
+                     {"room_number": 21, "type": "Deluxe Room", "price": 20000, "image_path": "softwarica\\photo\\hotel5.png"},
               ]
 
-              # Place the room frames in the scrollable frame
+              
               place_room_frames(bookingFrame, rooms)
 
               
@@ -332,7 +310,6 @@ class HomePage(customtkinter.CTk):
        ########################history####################
 
        
-              
        def on_history_tab_click(self, event):
               """ Authenticate admin before showing the History tab """
               adminLoginPage(self.show_history_tab)
@@ -340,84 +317,198 @@ class HomePage(customtkinter.CTk):
        def show_history_tab(self):
               """ Show History widgets after successful login """
               self.history_widgets(self.homeTab.tab("HISTORY"))
-       def history_widgets(self, history):
 
+       def history_widgets(self, history):
               class History:
                      def __init__(self, parent):
                             self.parent = parent
-                            self.scrollable_frame = customtkinter.CTkScrollableFrame(self.parent, corner_radius=10, fg_color="white", width=1000,height=600)
-                            self.scrollable_frame.grid(row=0, column=0, padx=20, pady=20)
+
+                            self.search_label = customtkinter.CTkLabel(self.parent, text="Search Booking ID:", font=("Helvetica", 16))
+                            self.search_label.grid(row=0, column=0)
+
+                            self.search_entry = customtkinter.CTkEntry(self.parent, width=200)
+                            self.search_entry.grid(row=0, column=1)
+
+                            self.search_button = customtkinter.CTkButton(self.parent, text="Search", command=self.search_booking, fg_color="#8e99ab", hover_color="#747d8c")
+                            self.search_button.grid(row=0, column=2)
+
+                            self.scrollable_frame = customtkinter.CTkScrollableFrame(self.parent, corner_radius=10, fg_color="white", width=1000, height=600)
+                            self.scrollable_frame.grid(row=1, column=0, columnspan=30)
+
+                            self.load_booking_history()  # Load all bookings initially
+
+                     def search_booking(self):
+                            booking_id = self.search_entry.get()
+                            if booking_id == "":  # If no ID is entered, load all bookings
+                                   self.load_booking_history()
+                            elif booking_id.isdigit():  # Check if the entered value is a valid ID
+                                   self.display_specific_booking(int(booking_id))
+                            else:
+                                   messagebox.showerror(title="Invalid Input", message="Please enter a valid booking ID.")
 
                      def load_booking_history(self):
-                           
                             for widget in self.scrollable_frame.winfo_children():
                                    widget.destroy()
 
                             conn = sqlite3.connect('hotel_management_user.db')
                             c = conn.cursor()
-                            c.execute("""SELECT id, room_number, first_name, last_name, checkin_date, checkout_date
+                            c.execute("""SELECT id, room_number, first_name, last_name, email, phone_number, guests, checkin_date, checkout_date
                                           FROM bookings""")
                             result = c.fetchall()
                             conn.close()
 
                             for record in result:
-                                   booking_id, room_number, first_name, last_name, checkin_date, checkout_date = record
+                                   booking_id, room_number, first_name, last_name, email, phone_number, guests, checkin_date, checkout_date = record
                                    record_frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color="#D9D9D9")
                                    record_frame.pack(padx=10, pady=5, fill='x')
 
-                                   uniqueId = customtkinter.CTkLabel(record_frame, text=f"Id: {booking_id}", font=("Helvetica", 20), text_color="black")
-                                   uniqueId.grid(row=0, column=0, padx=(10, 0), pady=10)
+                                   uniqueId = customtkinter.CTkLabel(record_frame, text="Id: ", font=("Helvetica", 20), text_color="black")
+                                   uniqueId.grid(row=0, column=0, padx=5, pady=5)
+                                   uniqueId1 = customtkinter.CTkLabel(record_frame, text=f"{booking_id}", font=("Helvetica", 20), text_color="black")
+                                   uniqueId1.grid(row=0, column=1, padx=5, pady=5)
 
-                                   name = customtkinter.CTkLabel(record_frame, text=f"{first_name} {last_name}", font=("Helvetica", 20), text_color="black")
-                                   name.grid(row=0, column=1, padx=30, pady=10)
+                                   name = customtkinter.CTkLabel(record_frame, text="Name : ", font=("Helvetica", 20), text_color="black")
+                                   name.grid(row=1, column=0, padx=5, pady=5)
+                                   name1 = customtkinter.CTkLabel(record_frame, text=f"{first_name} {last_name}", font=("Helvetica", 20), text_color="black")
+                                   name1.grid(row=1, column=1, padx=5, pady=5)
+
+                                   userEmail = customtkinter.CTkLabel(record_frame, text="Email : ", font=("Helvetica", 20), text_color="black")
+                                   userEmail.grid(row=2, column=0, padx=5, pady=5)
+                                   userEmail1 = customtkinter.CTkLabel(record_frame, text=f"{email}", font=("Helvetica", 20), text_color="black")
+                                   userEmail1.grid(row=2, column=1, padx=5, pady=5)
+
+                                   phoneNumber = customtkinter.CTkLabel(record_frame, text="Phone Number", font=("Helvetica", 20), text_color="black")
+                                   phoneNumber.grid(row=3, column=0, padx=5, pady=5)
+                                   phoneNumber1 = customtkinter.CTkLabel(record_frame, text=f"{phone_number}", font=("Helvetica", 20), text_color="black")
+                                   phoneNumber1.grid(row=3, column=1, padx=5, pady=5)
+
+                                   number_of_guest = customtkinter.CTkLabel(record_frame, text="Number of Guests", font=("Helvetica", 20), text_color="black")
+                                   number_of_guest.grid(row=4, column=0, padx=5, pady=5)
+                                   number_of_guest1 = customtkinter.CTkLabel(record_frame, text=f"{guests}", font=("Helvetica", 20), text_color="black")
+                                   number_of_guest1.grid(row=4, column=1, padx=5, pady=5)
 
                                    checkIn = customtkinter.CTkLabel(record_frame, text="Check-in-date:", font=("Helvetica", 20), text_color="black")
-                                   checkIn.grid(row=0, column=2, pady=10)
+                                   checkIn.grid(row=5, column=0, padx=5, pady=5)
                                    checkInD = customtkinter.CTkLabel(record_frame, text=checkin_date, font=("Helvetica", 20), text_color="black")
-                                   checkInD.grid(row=0, column=3, pady=10, padx=(0, 30))
+                                   checkInD.grid(row=5, column=1, padx=5, pady=5)
 
                                    checkOut = customtkinter.CTkLabel(record_frame, text="Check-out-date:", font=("Helvetica", 20), text_color="black")
-                                   checkOut.grid(row=1, column=2, pady=10)
+                                   checkOut.grid(row=6, column=0, padx=5, pady=5)
                                    checkOutD = customtkinter.CTkLabel(record_frame, text=checkout_date, font=("Helvetica", 20), text_color="black")
-                                   checkOutD.grid(row=1, column=3, pady=10, padx=(0, 30))
+                                   checkOutD.grid(row=6, column=1, padx=5, pady=5)
 
                                    room = customtkinter.CTkLabel(record_frame, text="Room no:", font=("Helvetica", 20), text_color="black")
-                                   room.grid(row=1, column=0, padx=(30, 0), pady=10)
+                                   room.grid(row=7, column=0, padx=5, pady=5)
                                    roomN = customtkinter.CTkLabel(record_frame, text=room_number, font=("Helvetica", 20), text_color="black")
-                                   roomN.grid(row=1, column=1, padx=(0, 10), pady=10)
-
-                                   book = customtkinter.CTkLabel(record_frame, text="Date booked:", font=("Helvetica", 20), text_color="black")
-                                   book.grid(row=2, column=0, padx=(10, 0), pady=10)
-                                   bookDate = customtkinter.CTkLabel(record_frame, text="00/00/00", font=("Helvetica", 20), text_color="black")
-                                   bookDate.grid(row=2, column=1, pady=10)
+                                   roomN.grid(row=7, column=1, padx=5, pady=5)
 
                                    scheduledD = customtkinter.CTkLabel(record_frame, text="Booked", font=("Helvetica", 12), text_color="#218200")
-                                   scheduledD.grid(row=2, column=3)
+                                   scheduledD.grid(row=7, column=2, padx=5, pady=5)
 
-                                   update = customtkinter.CTkButton(record_frame, text="Update", font=("Helvetica", 12), text_color="white", width=40, fg_color="#1CCB0C",command=lambda bid=booking_id, room=room_number: self.open_booking_window(bid,room))
-                                   update.grid(row=2, column=2, padx=(40, 0))
+                                   update = customtkinter.CTkButton(record_frame, text="Update", font=("Helvetica", 12), text_color="white", width=40, fg_color="#1CCB0C", command=lambda bid=booking_id, room=room_number: self.open_booking_window(bid, room))
+                                   update.grid(row=9, column=1, padx=5, pady=5)
 
-                                   delete_button = customtkinter.CTkButton(record_frame, text="Delete", font=("Helvetica", 12), text_color="white", width=40, fg_color="red",command=lambda room_number=room_number: self.delete_booking(room_number))
-                                   delete_button.grid(row=1, column=4, padx=(40, 0))
-                     def delete_booking(self,room_number):
+                                   delete_button = customtkinter.CTkButton(record_frame, text="Delete", font=("Helvetica", 12), text_color="white", width=40, fg_color="red", command=lambda bid=booking_id: self.delete_booking(bid))
+                                   delete_button.grid(row=9, column=2, padx=5, pady=5)
+
+                     def display_specific_booking(self, booking_id):
+                            # Clear existing widgets
+                            for widget in self.scrollable_frame.winfo_children():
+                                   widget.destroy()
+
+                            conn = sqlite3.connect('hotel_management_user.db')
+                            c = conn.cursor()
+                            c.execute("""SELECT id, room_number, first_name, last_name, email, phone_number, guests, checkin_date, checkout_date
+                                          FROM bookings WHERE id = ?""", (booking_id,))
+                            record = c.fetchone()
+                            conn.close()
+
+                            if record:
+                                   self.create_record_frame(record)
+                            else:
+                                   messagebox.showinfo(title="No Booking Found", message="No booking found with the provided ID.")
+
+                     def create_record_frame(self, record):
+                            booking_id, room_number, first_name, last_name, email, phone_number, guests, checkin_date, checkout_date = record
+                            record_frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=10, fg_color="#D9D9D9")
+                            record_frame.pack(padx=10, pady=5, fill='x')
+
+                            uniqueId = customtkinter.CTkLabel(record_frame, text="Id: ", font=("Helvetica", 20), text_color="black")
+                            uniqueId.grid(row=0, column=0, padx=5, pady=5)
+                            uniqueId1 = customtkinter.CTkLabel(record_frame, text=f"{booking_id}", font=("Helvetica", 20), text_color="black")
+                            uniqueId1.grid(row=0, column=1, padx=5, pady=5)
+
+                            name = customtkinter.CTkLabel(record_frame, text="Name : ", font=("Helvetica", 20), text_color="black")
+                            name.grid(row=1, column=0, padx=5, pady=5)
+                            name1 = customtkinter.CTkLabel(record_frame, text=f"{first_name} {last_name}", font=("Helvetica", 20), text_color="black")
+                            name1.grid(row=1, column=1, padx=5, pady=5)
+
+                            userEmail = customtkinter.CTkLabel(record_frame, text="Email : ", font=("Helvetica", 20), text_color="black")
+                            userEmail.grid(row=2, column=0, padx=5, pady=5)
+                            userEmail1 = customtkinter.CTkLabel(record_frame, text=f"{email}", font=("Helvetica", 20), text_color="black")
+                            userEmail1.grid(row=2, column=1, padx=5, pady=5)
+
+                            phoneNumber = customtkinter.CTkLabel(record_frame, text="Phone Number", font=("Helvetica", 20), text_color="black")
+                            phoneNumber.grid(row=3, column=0, padx=5, pady=5)
+                            phoneNumber1 = customtkinter.CTkLabel(record_frame, text=f"{phone_number}", font=("Helvetica", 20), text_color="black")
+                            phoneNumber1.grid(row=3, column=1, padx=5, pady=5)
+
+                            number_of_guest = customtkinter.CTkLabel(record_frame, text="Number of Guests", font=("Helvetica", 20), text_color="black")
+                            number_of_guest.grid(row=4, column=0, padx=5, pady=5)
+                            number_of_guest1 = customtkinter.CTkLabel(record_frame, text=f"{guests}", font=("Helvetica", 20), text_color="black")
+                            number_of_guest1.grid(row=4, column=1, padx=5, pady=5)
+
+                            checkIn = customtkinter.CTkLabel(record_frame, text="Check-in-date:", font=("Helvetica", 20), text_color="black")
+                            checkIn.grid(row=5, column=0, padx=5, pady=5)
+                            checkInD = customtkinter.CTkLabel(record_frame, text=checkin_date, font=("Helvetica", 20), text_color="black")
+                            checkInD.grid(row=5, column=1, padx=5, pady=5)
+
+                            checkOut = customtkinter.CTkLabel(record_frame, text="Check-out-date:", font=("Helvetica", 20), text_color="black")
+                            checkOut.grid(row=6, column=0, padx=5, pady=5)
+                            checkOutD = customtkinter.CTkLabel(record_frame, text=checkout_date, font=("Helvetica", 20), text_color="black")
+                            checkOutD.grid(row=6, column=1, padx=5, pady=5)
+
+                            room = customtkinter.CTkLabel(record_frame, text="Room no:", font=("Helvetica", 20), text_color="black")
+                            room.grid(row=7, column=0, padx=5, pady=5)
+                            roomN = customtkinter.CTkLabel(record_frame, text=room_number, font=("Helvetica", 20), text_color="black")
+                            roomN.grid(row=7, column=1, padx=5, pady=5)
+
+                            scheduledD = customtkinter.CTkLabel(record_frame, text="Booked", font=("Helvetica", 12), text_color="#218200")
+                            scheduledD.grid(row=7, column=2, padx=5, pady=5)
+
+                            update = customtkinter.CTkButton(record_frame, text="Update", font=("Helvetica", 12), text_color="white", width=40, fg_color="#1CCB0C", command=lambda bid=booking_id, room=room_number: self.open_booking_window(bid, room))
+                            update.grid(row=9, column=1, padx=5, pady=5)
+
+                            delete_button = customtkinter.CTkButton(record_frame, text="Delete", font=("Helvetica", 12), text_color="white", width=40, fg_color="red", command=lambda bid=booking_id: self.delete_booking(bid))
+                            delete_button.grid(row=9, column=2, padx=5, pady=5)
+
+                     def delete_booking(self, booking_id):
                             try:
                                    conn = sqlite3.connect('hotel_management_user.db')
                                    c = conn.cursor()
                                    
-                                   # Check if the bookings table exists
-                                   c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='bookings'")
-                                   if not c.fetchone():
-                                          raise sqlite3.OperationalError("The 'bookings' table does not exist.")
+                                   # Fetch the room number before deleting the booking
+                                   c.execute("SELECT room_number FROM bookings WHERE id = ?", (booking_id,))
+                                   room_number = c.fetchone()
 
-                                   # Execute the DELETE statement
-                                   c.execute('DELETE FROM bookings WHERE room_number = ?', (room_number,))
+                                   if room_number:
+                                          room_number = room_number[0]  # Extract the room number
+                                          
+                                          # Delete the booking
+                                          c.execute('DELETE FROM bookings WHERE id = ?', (booking_id,))
+                                          
+                                          # Update the room status to 'Available'
+                                          c.execute("UPDATE rooms SET status = 'Available' WHERE room_number = ?", (room_number,))
 
-                                   c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", ('Available', room_number))
-                                   conn.commit()
+                                          conn.commit()
 
-                                   self.load_booking_history()
-                                   
-                                   messagebox.showinfo(title="Success", message="Booking deleted successfully.")
+                                          # Reload the history to update UI
+                                          self.load_booking_history()
+                                          
+                                          messagebox.showinfo(title="Success", message="Booking deleted successfully.")
+                                   else:
+                                          messagebox.showerror(title="Error", message="Booking not found.")
+
                             except sqlite3.Error as e:
                                    messagebox.showerror(title="Error", message=f"An error occurred: {e}")
                             finally:
@@ -430,20 +521,16 @@ class HomePage(customtkinter.CTk):
                             c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", (status, room_number))
                             conn.commit()
                             conn.close()
-                     def open_booking_window(self, booking_id,room_number):
+
+                     def open_booking_window(self, booking_id, room_number):
                             from appointment import BookingWindow
                             booking_window = BookingWindow(booking_id=booking_id, 
-                                                           room_number=room_number,
-                                                           update_room_status=self.update_room_status,
-                                                           refresh_callback=self.load_booking_history )
+                                                               room_number=room_number,
+                                                               update_room_status=self.update_room_status,
+                                                               refresh_callback=self.load_booking_history)
                             booking_window.grab_set()
 
-                     def update_booking(self, booking_id):
-                            # This method can be used to update the booking info if necessary
-                            app = BookingWindow(booking_id)
-                            app.mainloop()
-
-                     # Create an instance of the History class and load booking history
+                            # Create an instance of the History class and load booking history
               history_instance = History(history)
               history_instance.load_booking_history()
 

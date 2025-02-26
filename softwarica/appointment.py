@@ -3,7 +3,8 @@ import customtkinter
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import sqlite3
-
+import datetime
+import tkinter as tk
 
 
 customtkinter.set_appearance_mode("dark")
@@ -12,42 +13,24 @@ customtkinter.set_default_color_theme("dark-blue")
 
 
 class BookingWindow(customtkinter.CTkToplevel):
-    def __init__(self,  booking_id=None,room_number=None, update_room_status=None, refresh_callback=None,refresh_ui=None):
+    def __init__(self,  booking_id=None,room_number=None,):
         super().__init__()
         self.booking_id = booking_id
         self.room_number = room_number
-        self.update_room_status = update_room_status
-        self.refresh_ui = refresh_ui
-        self.refresh_callback = refresh_callback
+   
         self.title("Afnaighar")
         self.geometry("600x700")
         self.resizable(False, False)
         
-        self.booking_id = self.get_booking_id(room_number)
-        if self.booking_id is None:
-            print("No booking found for this room.")
-        else:
-            print(f"Booking ID: {self.booking_id}")
-
         self.create_widgets()
+        self.booking_id = self.get_booking_id(room_number)
+        
         if self.booking_id:
             self.prefill_booking_details()
 
         
     
-    def update_ui(self):
-        # Update the status of the room
-        self.status = get_room_status(self.room_number)
-        
-        # Update the status label text and color
-        new_status_text_color = "#B7D5B5" if self.status == "Available" else "red"
-        self.label3.configure(text=self.status, text_color=new_status_text_color)
-        
-        # Update the button based on the new status
-        if self.status == "Available":
-            self.bookNow1.configure(text="BOOK NOW", fg_color="#B7D5B5", state="normal", command=lambda: self.book_now(self.room_number))
-        else:
-            self.bookNow1.configure(text="BOOKED", fg_color="#FF4D4D", state="disabled", command=None)
+    
     def get_booking_id(self, room_number):
         conn = sqlite3.connect('hotel_management_user.db')
         c = conn.cursor()
@@ -56,17 +39,22 @@ class BookingWindow(customtkinter.CTkToplevel):
         conn.close()
         
         if booking_id:
-            return booking_id[0]  # Assuming 'id' is the first column in your table
+            return booking_id[0]  
         else:
             return None
     def prefill_booking_details(self):
         conn = sqlite3.connect('hotel_management_user.db')
         c = conn.cursor()
+
+        
         c.execute("SELECT room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment FROM bookings WHERE id = ?", (self.booking_id,))
         details = c.fetchone()
         conn.close()
 
-        if details:
+        
+        
+
+        if details is not None and len(details) == 11:
             (self.room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) = details
             self.userEntry.insert(0, first_name)
             self.user1Entry.insert(0, last_name)
@@ -79,6 +67,11 @@ class BookingWindow(customtkinter.CTkToplevel):
             self.guestsEntry.insert(0, guests)
             self.payment_option.set(payment)
             self.roomLabel.configure(text=f"Room No: {self.room_number}")
+        else:
+            
+            print("No booking found or incorrect number of details retrieved.")
+            self.userEntry.insert(0, "")
+            
     def create_widgets(self,):
         
         
@@ -93,6 +86,8 @@ class BookingWindow(customtkinter.CTkToplevel):
         self.userLabel.grid(row=1, column=0, padx=(50, 10))
         self.userEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your firstname", width=200, height=30)
         self.userEntry.grid(row=1, column=1, padx=(10, 60), pady=(20, 10))
+        
+        print(f"userEntry initialized: {self.userEntry}") 
 
         # Last Name
         self.user1Label = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Last Name")
@@ -124,16 +119,27 @@ class BookingWindow(customtkinter.CTkToplevel):
         self.numberEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter your number", width=200, height=30)
         self.numberEntry.grid(row=6, column=1, padx=(10, 60), pady=10)
 
+        
+        today = datetime.datetime.today()
+
+        default_checkin_date = (today + datetime.timedelta(days=1)).strftime("%d/%m/%Y")
+
+       
+        default_checkout_date = (today + datetime.timedelta(days=2)).strftime("%d/%m/%Y")
         # Check-in Date
         self.checkinLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-in Date")
         self.checkinLabel.grid(row=7, column=0, padx=(50, 10), pady=10)
-        self.checkinEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
+
+        self.checkin_var = tk.StringVar(value=default_checkin_date)
+        self.checkinEntry = customtkinter.CTkEntry(bookingFrame, textvariable=self.checkin_var, width=200, height=30)
         self.checkinEntry.grid(row=7, column=1, padx=(10, 60), pady=10)
 
         # Check-out Date
         self.checkoutLabel = customtkinter.CTkLabel(bookingFrame, text_color="black", text="Check-out Date")
         self.checkoutLabel.grid(row=8, column=0, padx=(50, 10), pady=10)
-        self.checkoutEntry = customtkinter.CTkEntry(bookingFrame, placeholder_text="Enter DD/MM/YYYY", width=200, height=30)
+        
+        self.checkout_var = tk.StringVar(value=default_checkout_date)
+        self.checkoutEntry = customtkinter.CTkEntry(bookingFrame,textvariable=self.checkout_var, width=200, height=30)
         self.checkoutEntry.grid(row=8, column=1, padx=(10, 60), pady=10)
 
         # Number of Guests
@@ -167,10 +173,7 @@ class BookingWindow(customtkinter.CTkToplevel):
 
     
     
-    def update_booking(self):
-   
-        if self.refresh_callback:
-            self.refresh_callback()
+    
 
     def get_booking_details(self):
         # Retrieve booking details by booking_id
@@ -188,7 +191,7 @@ class BookingWindow(customtkinter.CTkToplevel):
             return "Please fill in all the fields."
         if "@" not in email or '.' not in email.split('@')[-1]:
             return "Please enter a valid email address."
-        if not phone_number.isdigit() or len(phone_number) < 10:
+        if not phone_number.isdigit() or len(phone_number) != 10:
             return "Please enter a valid phone number."
         
         return True
@@ -204,36 +207,43 @@ class BookingWindow(customtkinter.CTkToplevel):
         checkout_date = self.checkoutEntry.get()
         guests = self.guestsEntry.get()
         payment = self.payment_option.get()
+        conn=None
 
         validation_result = self.validate_input(first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests)
         if validation_result is True:
             try:
-                conn = sqlite3.connect('hotel_management_user.db')
-                c = conn.cursor()
-            
-                if self.booking_id:  
-                    c.execute('''UPDATE bookings SET first_name=?, last_name=?, username=?, address=?, email=?, phone_number=?, checkin_date=?, checkout_date=?, guests=?, payment=? 
-                                WHERE id=?''',
-                            (first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment, self.booking_id))
-                    messagebox.showinfo(title="Successfully Updated", message="Your booking has been updated!")
+                            
+                checkin_date_obj = datetime.datetime.strptime(checkin_date, "%d/%m/%Y")  # Ensure format is DD/MM/YYYY
+                today = datetime.datetime.today()
+
+                
+                if checkin_date_obj < today:
+                    messagebox.showwarning("Invalid Booking", "Check-in date is in the past. Booking cannot be made.")
                 else:
-                    c.execute('''INSERT INTO bookings (room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                            (self.room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment))
-                    messagebox.showinfo(title="Successfully Updated", message="Your booking has been updated!")
-                conn.commit()
+                    conn = sqlite3.connect('hotel_management_user.db')
+                    c = conn.cursor()
                     
-                
-                
-                
-                
+                    c.execute("SELECT COUNT(*) FROM bookings WHERE room_number = ? AND checkin_date = ?", (self.room_number, checkin_date))
+                    count = c.fetchone()[0]
+
+                    if count > 0:
+                        messagebox.showerror(title="Booking Error", message="This room is already booked for the selected check-in date. Please choose another date.")
+                        return
+                    else:
+                    
+                        c.execute('''INSERT INTO bookings (room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                                (self.room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment))
+                        booking_id = c.lastrowid
+                        messagebox.showinfo(title="Booking Successful", message=f"Your booking has been successfully created! Booking ID: {booking_id}")
+                        conn.commit()
+                    
             except sqlite3.Error as e:
                 messagebox.showerror(title="Database Error", message=f"An error occurred while saving your booking: {e}")
             finally:
-                conn.close()
+                if conn:
+                    conn.close()
 
-            self.update_room_status(self.room_number, "Booked")
-            if self.refresh_callback:
-                    self.refresh_callback()
+           
             self.destroy()
             self.update()
         else:
