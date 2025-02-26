@@ -100,7 +100,32 @@ class HomePage(customtkinter.CTk):
        
 
               ################# rooms  ##############
+       
+       def update_room_status(self,room_number,status):
+                                   conn = sqlite3.connect('hotel_management_user.db')
+                                   c = conn.cursor()
 
+                                   # Update the status of the room in the database
+                                   c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", (status, room_number))
+                                   conn.commit()
+
+                                   conn.close()
+       def get_room_status(room_number):
+                     conn = sqlite3.connect('hotel_management_user.db')
+                     c = conn.cursor()
+                     
+                     # Fetch the status of the room from the database
+                     c.execute("SELECT status FROM rooms WHERE room_number = ?", (room_number,))
+                     status = c.fetchone()
+                     
+                     conn.close()
+              
+                     if status:
+                            return status[0]  # return the status if found (Booked or Available)
+                     return "Available"  # default to "Available" if no status found
+
+       
+       
        def room_widgets(self,room):
               homeTitle = customtkinter.CTkLabel(room, text="AfnaiGhar", font=("Comic Sans MS", 48, "bold"), text_color="white", fg_color="transparent")
               homeTitle.grid(row=0, column=0, padx=40, pady=40)
@@ -115,31 +140,32 @@ class HomePage(customtkinter.CTk):
                                                         scrollbar_button_color="gray",
                                                         scrollbar_button_hover_color="gray")
               bookingFrame.grid(row=1,column=0,columnspan=70,padx=0,pady=(80,0))
+
+              def place_room_frames(parent, rooms):
+                     row = 0
+                     column = 0
+                     for room in rooms:
+                            RoomFrame(parent, room["room_number"], room["type"], room["price"], room["image_path"], row, column,room["status"],self.update_room_status)
+                            column += 1
+                            if column == 3:  # Move to the next row after 2 columns
+                                   column = 0
+                                   row += 1
+              # Define the function to get room status
+              
               
 
-              # Define the function to get room status
-              def get_room_status(room_number):
-                     conn = sqlite3.connect('hotel_management_user.db')
-                     c = conn.cursor()
-                     
-                     # Fetch the status of the room from the database
-                     c.execute("SELECT status FROM rooms WHERE room_number = ?", (room_number,))
-                     status = c.fetchone()
-                     
-                     conn.close()
               
-                     if status:
-                            return status[0]  # return the status if found (Booked or Available)
-                     return "Available"  # default to "Available" if no status found
 
 
               class RoomFrame:
-                     def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column,status):
+                     def __init__(self,parent, room_number, room_type, price_per_night, image_path, row, column,status,update_room_status):
                             self.room_number = room_number
                             self.room_type = room_type
                             self.price_per_night = price_per_night
                             self.image_path = image_path
-                            self.status = get_room_status(room_number)  # This keeps track of the current status
+                            self.status = status
+                            self.update_room_status = update_room_status   # This keeps track of the current status
+                            # self.booking_id = self.get_booking_id(self.room_number)
 
                             self.status_text_color = "#B7D5B5" if status == "Available" else "red"
 
@@ -172,7 +198,23 @@ class HomePage(customtkinter.CTk):
                             self.roomD.grid(row=4,column=0,padx=(200,0),pady=(10,0))
                             self.bookNow1 = customtkinter.CTkButton(self.frame, text="BOOK NOW", font=("Helvetica", 18, "bold"), fg_color="#B7D5B5", text_color="white", corner_radius=10, width=60, height=30, command=lambda: self.book_now(room_number))
                             self.bookNow1.grid(row=4, column=0, padx=(0, 170), pady=(10, 30))
-                           
+
+                     
+                     def get_booking_id(self, room_number):
+                            # Fetch the booking ID from the database if it exists
+                            conn = sqlite3.connect('hotel_management_user.db')
+                            c = conn.cursor()
+
+                            # Assuming the bookings table has a column `room_number` and `booking_id`
+                            c.execute("SELECT booking_id FROM bookings WHERE room_number = ?", (room_number,))
+                            result = c.fetchone()
+
+                            conn.close()
+
+                            if result:
+                                return result[0]  # Return the booking_id if found
+                            return None  # No booking found for the room
+                                          
                      def refresh_ui(self):
                             # Update the status of the room
                             self.status = get_room_status(self.room_number)
@@ -186,42 +228,41 @@ class HomePage(customtkinter.CTk):
                                    self.bookNow1.configure(text="BOOK NOW", fg_color="#B7D5B5", state="normal", command=lambda: self.book_now(self.room_number))
                             else:
                                    self.bookNow1.configure(text="BOOKED", fg_color="#FF4D4D", state="disabled", command=None)
+                     
                      def book_now(self, room_number):
                             from appointment import BookingWindow
+                             # Check if the room is available
+                            if self.status != "Available":
+                                   print(f"Room {self.room_number} is already booked.")
+                                   return  # Don't proceed if the room is already booked
+
+                            # Create a new booking for the room (insert a new record in the bookings table)
+                            conn = sqlite3.connect('hotel_management_user.db')
+                            c = conn.cursor()
+                            
+                            # Insert a new booking for the room (You can use room_number and other details)
+                            c.execute("INSERT INTO bookings (room_number) VALUES (?)", (self.room_number,))
+                            conn.commit()
+                            booking_id = c.lastrowid  # Get the ID of the newly inserted booking
+                            
+                            conn.close()
+                            
+                            if booking_id:
+                                   print(f"Booking successful for room {self.room_number}. Booking ID: {booking_id}")
+                            else:
+                                   print("Booking failed. Please try again.")
+                                   return  # Exit the method if booking failed
                             app = BookingWindow(room_number, self.update_room_status, self.refresh_ui)
                             self.frame.wait_window(app)
-                            self.update_room_status(room_number, "Booked")
-                            self.update_status()
-
-                     def update_room_status(self,room_number,status):
-                                   conn = sqlite3.connect('hotel_management_user.db')
-                                   c = conn.cursor()
-
-                                   # Update the status of the room in the database
-                                   c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", (status, room_number))
-                                   conn.commit()
-
-                                   conn.close()
+                            self.update_room_status(self.room_number, "Booked")
+                            self.refresh_ui()
 
                      
-        
-                     def update_status(self):
-                            self.bookNow1.configure(text="BOOKED", fg_color="#FF4D4D", state="disabled")
-
-                            # Update the status label to "Booked" with red color
-                            self.label3.configure(text="Booked", text_color="red")                    
+                    
 
               
 
-              def place_room_frames(parent, rooms):
-                     row = 0
-                     column = 0
-                     for room in rooms:
-                            RoomFrame(parent, room["room_number"], room["type"], room["price"], room["image_path"], row, column,room["status"])
-                            column += 1
-                            if column == 3:  # Move to the next row after 2 columns
-                                   column = 0
-                                   row += 1
+              
 
 
               rooms = [

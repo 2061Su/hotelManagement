@@ -12,22 +12,75 @@ customtkinter.set_default_color_theme("dark-blue")
 
 
 class BookingWindow(customtkinter.CTkToplevel):
-    def __init__(self, room_number, booking_id, update_room_status,refresh_callback=None):
+    def __init__(self,  booking_id=None,room_number=None, update_room_status=None, refresh_callback=None,refresh_ui=None):
         super().__init__()
         self.booking_id = booking_id
         self.room_number = room_number
         self.update_room_status = update_room_status
+        self.refresh_ui = refresh_ui
         self.refresh_callback = refresh_callback
         self.title("Afnaighar")
         self.geometry("600x700")
         self.resizable(False, False)
+        
+        self.booking_id = self.get_booking_id(room_number)
+        if self.booking_id is None:
+            print("No booking found for this room.")
+        else:
+            print(f"Booking ID: {self.booking_id}")
+
         self.create_widgets()
         if self.booking_id:
             self.prefill_booking_details()
-    
-    
 
+        
+    
+    def update_ui(self):
+        # Update the status of the room
+        self.status = get_room_status(self.room_number)
+        
+        # Update the status label text and color
+        new_status_text_color = "#B7D5B5" if self.status == "Available" else "red"
+        self.label3.configure(text=self.status, text_color=new_status_text_color)
+        
+        # Update the button based on the new status
+        if self.status == "Available":
+            self.bookNow1.configure(text="BOOK NOW", fg_color="#B7D5B5", state="normal", command=lambda: self.book_now(self.room_number))
+        else:
+            self.bookNow1.configure(text="BOOKED", fg_color="#FF4D4D", state="disabled", command=None)
+    def get_booking_id(self, room_number):
+        conn = sqlite3.connect('hotel_management_user.db')
+        c = conn.cursor()
+        c.execute("SELECT id FROM bookings WHERE room_number = ?", (room_number,))
+        booking_id = c.fetchone()
+        conn.close()
+        
+        if booking_id:
+            return booking_id[0]  # Assuming 'id' is the first column in your table
+        else:
+            return None
+    def prefill_booking_details(self):
+        conn = sqlite3.connect('hotel_management_user.db')
+        c = conn.cursor()
+        c.execute("SELECT room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment FROM bookings WHERE id = ?", (self.booking_id,))
+        details = c.fetchone()
+        conn.close()
+
+        if details:
+            (self.room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) = details
+            self.userEntry.insert(0, first_name)
+            self.user1Entry.insert(0, last_name)
+            self.usernameEntry.insert(0, username)
+            self.addressEntry.insert(0, address)
+            self.emailEntry.insert(0, email)
+            self.numberEntry.insert(0, phone_number)
+            self.checkinEntry.insert(0, checkin_date)
+            self.checkoutEntry.insert(0, checkout_date)
+            self.guestsEntry.insert(0, guests)
+            self.payment_option.set(payment)
+            self.roomLabel.configure(text=f"Room No: {self.room_number}")
     def create_widgets(self,):
+        
         
         bookingFrame = customtkinter.CTkFrame(self, corner_radius=10, fg_color="white")
         bookingFrame.grid(row=0, column=0,padx=(70,0))
@@ -112,25 +165,8 @@ class BookingWindow(customtkinter.CTkToplevel):
 
         booking_details = self.get_booking_details()
 
-    def prefill_booking_details(self):
-        conn = sqlite3.connect('hotel_management_user.db')
-        c = conn.cursor()
-        c.execute("SELECT room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment FROM bookings WHERE id = ?", (self.booking_id,))
-        details = c.fetchone()
-        conn.close()
-        if details:
-            (self.room_number, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) = details
-            self.userEntry.insert(0, first_name)
-            self.user1Entry.insert(0, last_name)
-            self.usernameEntry.insert(0, username)
-            self.addressEntry.insert(0, address)
-            self.emailEntry.insert(0, email)
-            self.numberEntry.insert(0, phone_number)
-            self.checkinEntry.insert(0, checkin_date)
-            self.checkoutEntry.insert(0, checkout_date)
-            self.guestsEntry.insert(0, guests)
-            self.payment_option.set(payment)
-            self.roomLabel.configure(text=f"Room No: {self.room_number}")
+    
+    
     def update_booking(self):
    
         if self.refresh_callback:
@@ -144,6 +180,8 @@ class BookingWindow(customtkinter.CTkToplevel):
         details = c.fetchone()
         conn.close()
         return details
+    
+    
 
     def validate_input(self, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests):
         if not all([first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests]):
@@ -169,23 +207,39 @@ class BookingWindow(customtkinter.CTkToplevel):
 
         validation_result = self.validate_input(first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests)
         if validation_result is True:
-            if self.room_number:
+            try:
                 conn = sqlite3.connect('hotel_management_user.db')
                 c = conn.cursor()
-                c.execute('''INSERT INTO bookings (room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                        (self.room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment))
+            
+                if self.booking_id:  
+                    c.execute('''UPDATE bookings SET first_name=?, last_name=?, username=?, address=?, email=?, phone_number=?, checkin_date=?, checkout_date=?, guests=?, payment=? 
+                                WHERE id=?''',
+                            (first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment, self.booking_id))
+                    messagebox.showinfo(title="Successfully Updated", message="Your booking has been updated!")
+                else:
+                    c.execute('''INSERT INTO bookings (room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                            (self.room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment))
+                    messagebox.showinfo(title="Successfully Updated", message="Your booking has been updated!")
                 conn.commit()
+                    
+                
+                
+                
+                
+            except sqlite3.Error as e:
+                messagebox.showerror(title="Database Error", message=f"An error occurred while saving your booking: {e}")
+            finally:
                 conn.close()
 
-                self.update_room_status(self.room_number, "Booked")
+            self.update_room_status(self.room_number, "Booked")
+            if self.refresh_callback:
+                    self.refresh_callback()
+            self.destroy()
+            self.update()
+        else:
+            messagebox.showerror(title="Invalid Input", message="an error occurred while saving your booking")
 
-                messagebox.showinfo(title="Successfully Booked", message="You have successfully booked!") 
-                self.destroy()
-                self.update()
-
-                
-            else:
-                messagebox.showerror(title="Error", message="Please fill in all the fields.")
+             
         
        
 
