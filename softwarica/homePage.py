@@ -170,18 +170,26 @@ class HomePage(customtkinter.CTk):
                             self.roomP.grid(row=4,column=0,padx=(200,0),pady=(0,30))
                             self.roomD=customtkinter.CTkLabel(self.frame,text="per night",font=("Helvetica",8,"bold"),fg_color="transparent",text_color="#948E3C")
                             self.roomD.grid(row=4,column=0,padx=(200,0),pady=(10,0))
-
+                            self.bookNow1 = customtkinter.CTkButton(self.frame, text="BOOK NOW", font=("Helvetica", 18, "bold"), fg_color="#B7D5B5", text_color="white", corner_radius=10, width=60, height=30, command=lambda: self.book_now(room_number))
+                            self.bookNow1.grid(row=4, column=0, padx=(0, 170), pady=(10, 30))
+                           
+                     def refresh_ui(self):
+                            # Update the status of the room
+                            self.status = get_room_status(self.room_number)
+                            
+                            # Update the status label text and color
+                            new_status_text_color = "#B7D5B5" if self.status == "Available" else "red"
+                            self.label3.configure(text=self.status, text_color=new_status_text_color)
+                            
+                            # Update the button based on the new status
                             if self.status == "Available":
-                                   self.bookNow1 = customtkinter.CTkButton(self.frame, text="BOOK NOW", font=("Helvetica", 18, "bold"), fg_color="#B7D5B5", text_color="white", corner_radius=10, width=60, height=30, command=lambda: self.book_now(room_number))
-                                   self.bookNow1.grid(row=4, column=0, padx=(0, 170), pady=(10, 30))
+                                   self.bookNow1.configure(text="BOOK NOW", fg_color="#B7D5B5", state="normal", command=lambda: self.book_now(self.room_number))
                             else:
-                                   self.bookNow1 = customtkinter.CTkButton(self.frame, text="BOOKED", font=("Helvetica", 18, "bold"), fg_color="#FF4D4D", text_color="white", corner_radius=10, width=60, height=30, state="disabled")
-                                   self.bookNow1.grid(row=4, column=0, padx=(0, 170), pady=(10, 30))
-                     
+                                   self.bookNow1.configure(text="BOOKED", fg_color="#FF4D4D", state="disabled", command=None)
                      def book_now(self, room_number):
                             from appointment import BookingWindow
-                            app = BookingWindow(room_number, self.update_room_status)
-                            app.wait_window(app)
+                            app = BookingWindow(room_number, self.update_room_status, self.refresh_ui)
+                            self.frame.wait_window(app)
                             self.update_room_status(room_number, "Booked")
                             self.update_status()
 
@@ -292,6 +300,7 @@ class HomePage(customtkinter.CTk):
               """ Show History widgets after successful login """
               self.history_widgets(self.homeTab.tab("HISTORY"))
        def history_widgets(self, history):
+
               class History:
                      def __init__(self, parent):
                             self.parent = parent
@@ -344,8 +353,49 @@ class HomePage(customtkinter.CTk):
                                    scheduledD = customtkinter.CTkLabel(record_frame, text="Booked", font=("Helvetica", 12), text_color="#218200")
                                    scheduledD.grid(row=2, column=3)
 
-                                   update = customtkinter.CTkButton(record_frame, text="Update", font=("Helvetica", 12), text_color="white", width=40, fg_color="#1CCB0C",command=lambda:reUpdate())
+                                   update = customtkinter.CTkButton(record_frame, text="Update", font=("Helvetica", 12), text_color="white", width=40, fg_color="#1CCB0C",command=lambda bid=booking_id, room=room_number: self.open_booking_window(bid,room))
                                    update.grid(row=2, column=2, padx=(40, 0))
+
+                                   delete_button = customtkinter.CTkButton(record_frame, text="Delete", font=("Helvetica", 12), text_color="white", width=40, fg_color="red",command=lambda room_number=room_number: self.delete_booking(room_number))
+                                   delete_button.grid(row=1, column=4, padx=(40, 0))
+                     def delete_booking(self,room_number):
+                            try:
+                                   conn = sqlite3.connect('hotel_management_user.db')
+                                   c = conn.cursor()
+                                   
+                                   # Check if the bookings table exists
+                                   c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='bookings'")
+                                   if not c.fetchone():
+                                          raise sqlite3.OperationalError("The 'bookings' table does not exist.")
+
+                                   # Execute the DELETE statement
+                                   c.execute('DELETE FROM bookings WHERE room_number = ?', (room_number,))
+
+                                   c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", ('Available', room_number))
+                                   conn.commit()
+
+                                   self.load_booking_history()
+                                   
+                                   messagebox.showinfo(title="Success", message="Booking deleted successfully.")
+                            except sqlite3.Error as e:
+                                   messagebox.showerror(title="Error", message=f"An error occurred: {e}")
+                            finally:
+                                   conn.close()
+
+                     def update_room_status(self, room_number, status):
+                            # Code to update the room status in the database
+                            conn = sqlite3.connect('hotel_management_user.db')
+                            c = conn.cursor()
+                            c.execute("UPDATE rooms SET status = ? WHERE room_number = ?", (status, room_number))
+                            conn.commit()
+                            conn.close()
+                     def open_booking_window(self, booking_id,room_number):
+                            from appointment import BookingWindow
+                            booking_window = BookingWindow(booking_id=booking_id, 
+                                                           room_number=room_number,
+                                                           update_room_status=self.update_room_status,
+                                                           refresh_callback=self.load_booking_history )
+                            booking_window.grab_set()
 
                      def update_booking(self, booking_id):
                             # This method can be used to update the booking info if necessary

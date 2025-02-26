@@ -12,11 +12,12 @@ customtkinter.set_default_color_theme("dark-blue")
 
 
 class BookingWindow(customtkinter.CTkToplevel):
-    def __init__(self,room_number=None,booking_id=None,update_room_status=None):
+    def __init__(self, room_number, booking_id, update_room_status,refresh_callback=None):
         super().__init__()
         self.booking_id = booking_id
         self.room_number = room_number
         self.update_room_status = update_room_status
+        self.refresh_callback = refresh_callback
         self.title("Afnaighar")
         self.geometry("600x700")
         self.resizable(False, False)
@@ -130,6 +131,10 @@ class BookingWindow(customtkinter.CTkToplevel):
             self.guestsEntry.insert(0, guests)
             self.payment_option.set(payment)
             self.roomLabel.configure(text=f"Room No: {self.room_number}")
+    def update_booking(self):
+   
+        if self.refresh_callback:
+            self.refresh_callback()
 
     def get_booking_details(self):
         # Retrieve booking details by booking_id
@@ -139,6 +144,16 @@ class BookingWindow(customtkinter.CTkToplevel):
         details = c.fetchone()
         conn.close()
         return details
+
+    def validate_input(self, first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests):
+        if not all([first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests]):
+            return "Please fill in all the fields."
+        if "@" not in email or '.' not in email.split('@')[-1]:
+            return "Please enter a valid email address."
+        if not phone_number.isdigit() or len(phone_number) < 10:
+            return "Please enter a valid phone number."
+        
+        return True
 
     def book(self):
         first_name = self.userEntry.get()
@@ -151,24 +166,27 @@ class BookingWindow(customtkinter.CTkToplevel):
         checkout_date = self.checkoutEntry.get()
         guests = self.guestsEntry.get()
         payment = self.payment_option.get()
+
+        validation_result = self.validate_input(first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests)
+        if validation_result is True:
+            if self.room_number:
+                conn = sqlite3.connect('hotel_management_user.db')
+                c = conn.cursor()
+                c.execute('''INSERT INTO bookings (room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                        (self.room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment))
+                conn.commit()
+                conn.close()
+
+                self.update_room_status(self.room_number, "Booked")
+
+                messagebox.showinfo(title="Successfully Booked", message="You have successfully booked!") 
+                self.destroy()
+                self.update()
+
+                
+            else:
+                messagebox.showerror(title="Error", message="Please fill in all the fields.")
         
-        if self.room_number and first_name and last_name and username and address and email and phone_number and checkin_date and checkout_date and guests:
-            conn = sqlite3.connect('hotel_management_user.db')
-            c = conn.cursor()
-            c.execute('''INSERT INTO bookings (room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                    (self.room_number,first_name, last_name, username, address, email, phone_number, checkin_date, checkout_date, guests, payment))
-            conn.commit()
-            conn.close()
-
-            self.update_room_status(self.room_number, "Booked")
-
-            messagebox.showinfo(title="Successfully Booked", message="You have successfully booked!") 
-            self.destroy()
-            self.update()
-
-            
-        else:
-            messagebox.showerror(title="Error", message="Please fill in all the fields.")
-        
+       
 
 

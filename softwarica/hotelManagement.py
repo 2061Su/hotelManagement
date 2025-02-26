@@ -63,6 +63,22 @@ def insert_sample_rooms():
         (2, "Single Room", 10000, "Available"),
         (3, "Suite Room", 25000, "Available"),
         (4, "Deluxe Room", 20000, "Available"),
+        (6,"Double Room",10000, "Available")
+        (7,"Suite Room",25000, "Available")
+        (8,"Deluxe Room",20000, "Available")
+        (9,"Double Room",17000, "Available")
+        (10,"Single Room",10000, "Available")
+        (11,"Suite Room",25000, "Available")
+        (12,"Deluxe Room",20000, "Available")
+        (13,"Double Room",17000, "Available")
+        (14,"Single Room",10000, "Available")
+        (15,"Suite Room",25000, "Available")
+        (16,"Deluxe Room",20000, "Available")
+        (17,"Single Room",10000, "Available")
+        (18,"Suite Room",25000, "Available")
+        (19,"Deluxe Room",20000, "Available")
+        (20,"Deluxe Room",20000, "Available")
+        (21,"Deluxe Room",20000, "Available")
         # Add more rooms as needed
     ]
 
