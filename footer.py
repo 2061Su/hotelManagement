@@ -68,4 +68,4 @@ for i in range(30):
  
 scrollable_body.update()
  
-root.mainloop()
+root
