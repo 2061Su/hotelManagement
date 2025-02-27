@@ -42,7 +42,7 @@ class Scrollable(tk.Frame):
         self.canvas.config(scrollregion=self.canvas.bbox(self.windows_item))
  
  
-root = tk.Tk()
+
  
 root.geometry('1000x700+100+50')
 root.resizable('False','False')
