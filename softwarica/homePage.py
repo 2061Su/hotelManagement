@@ -6,7 +6,7 @@ import sqlite3
 import ttkbootstrap as tb
 from ttkbootstrap.icons import Icon
 
-import testing
+import loginPage
 from adminlogin import adminLoginPage
 from reservationUserDetails import show_reservation_details
 
@@ -106,7 +106,7 @@ class HomePage(customtkinter.CTk):
        def transition_to_loginpage(self):
               self.destroy()
               self.update()
-              testing.App().mainloop()
+              loginPage.App().mainloop()
                      
                      
        
