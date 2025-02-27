@@ -1,11 +1,11 @@
 import sqlite3
 
 def create_bookings_table():
-    # Connect to the SQLite database (or create it if it doesn't exist)
+    
     conn = sqlite3.connect('hotel_management_user.db')
     c = conn.cursor()
 
-    # Create the bookings table if it doesn't already exist
+   
     c.execute('''
         CREATE TABLE IF NOT EXISTS bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +23,7 @@ def create_bookings_table():
         )
     ''')
 
-    # Commit and close the connection
+   
     conn.commit()
     conn.close()
 
@@ -31,11 +31,11 @@ def create_bookings_table():
 
 
 def create_rooms_table():
-    # Connect to the SQLite database (or create it if it doesn't exist)
+    
     conn = sqlite3.connect('hotel_management_user.db')
     c = conn.cursor()
 
-    # Create the rooms table if it doesn't already exist
+    
     c.execute(''' 
         CREATE TABLE IF NOT EXISTS rooms (
             room_number INTEGER PRIMARY KEY,
@@ -45,7 +45,7 @@ def create_rooms_table():
         )
     ''')
 
-    # Commit and close the connection
+    
     conn.commit()
     conn.close()
 
@@ -56,14 +56,14 @@ def insert_sample_rooms():
     conn = sqlite3.connect('hotel_management_user.db')
     c = conn.cursor()
 
-    # Check if rooms are already populated
+    
     c.execute("SELECT COUNT(*) FROM rooms")
     if c.fetchone()[0] > 0:
         print("Rooms are already inserted.")
         conn.close()
         return
 
-    # Define the rooms data to be inserted
+    
     rooms = [
         (1, "Double Room", 17000, "Available"),
         (2, "Single Room", 10000, "Available"),
@@ -88,7 +88,7 @@ def insert_sample_rooms():
         (21, "Deluxe Room", 20000, "Available"),
     ]
 
-    # Insert the rooms data into the database
+    
     c.executemany(''' 
         INSERT INTO rooms (room_number, room_type, price_per_night, status)
         VALUES (?, ?, ?, ?)

@@ -10,8 +10,7 @@ import testing
 from adminlogin import adminLoginPage
 from reservationUserDetails import show_reservation_details
 
-# customtkinter.set_appearance_mode("dark")
-# customtkinter.set_default_color_theme("dark-blue")
+
 
 
 class HomePage(customtkinter.CTk):
@@ -87,20 +86,22 @@ class HomePage(customtkinter.CTk):
                             messagebox.showinfo(title="Successfully Logged Out", message="You have successfully logged out!")
                             self.schedule_transition_login()
               if selection == "Reservation":
-
-                     pass
+                     reservation_window = customtkinter.CTkToplevel(self)
+                     reservation_window.title("Reservation Details")
+                     reservation_window.geometry("700x600")
+                     
+                     show_reservation_details(reservation_window)
        
        def get_selected_booking_id(self):
-              # Assuming booking_list holds booking data
-              selected_item = self.dropdown.get()  # Get the selected value from dropdown
+              selected_item = self.dropdown.get()  
               for record in self.booking_list:  
                      if selected_item in record:  
-                            return record[0]  # Assuming booking_id is the first column in DB
+                            return record[0]  
               return None
 
               
        def schedule_transition_login(self):
-              self.after(1000, self.transition_to_loginpage)  # Add a delay of 1000 milliseconds (1 second)
+              self.after(1000, self.transition_to_loginpage)  
 
        def transition_to_loginpage(self):
               self.destroy()
@@ -110,17 +111,14 @@ class HomePage(customtkinter.CTk):
                      
        
 
-              ################# rooms  ##############
+             
        
        
        def get_room_status(room_number):
                      conn = sqlite3.connect('hotel_management_user.db')
                      c = conn.cursor()
-                     
-                     # Fetch the status of the room from the database
                      c.execute("SELECT status FROM rooms WHERE room_number = ?", (room_number,))
                      status = c.fetchone()
-                     
                      conn.close()
               
                      
@@ -200,8 +198,6 @@ class HomePage(customtkinter.CTk):
                             
                             conn = sqlite3.connect('hotel_management_user.db')
                             c = conn.cursor()
-
-                            # Assuming the bookings table has a column `room_number` and `booking_id`
                             c.execute("SELECT id FROM bookings WHERE room_number = ?", (room_number,))
                             result = c.fetchone()
 
@@ -218,7 +214,7 @@ class HomePage(customtkinter.CTk):
                             conn = sqlite3.connect('hotel_management_user.db')
                             c = conn.cursor()
                             
-                            # Insert a new booking for the room (You can use room_number and other details)
+                            # Insert a new booking for the room
                             c.execute("INSERT INTO bookings (room_number) VALUES (?)", (self.room_number,))
                             conn.commit()
                             booking_id = c.lastrowid  
@@ -232,17 +228,6 @@ class HomePage(customtkinter.CTk):
                                    return 
                             app = BookingWindow(room_number=room_number )
                             self.frame.wait_window(app)
-                            
-                            
-
-                     
-                    
-
-              
-
-              
-
-
               rooms = [
                      {"room_number": 1, "type": "Double Room", "price": 17000, "image_path": "softwarica\\photo\\hotel.png"},
                      {"room_number": 2, "type": "Single Room", "price": 10000, "image_path": "softwarica\\photo\\hotel1.png"},
@@ -335,13 +320,13 @@ class HomePage(customtkinter.CTk):
                             self.scrollable_frame = customtkinter.CTkScrollableFrame(self.parent, corner_radius=10, fg_color="white", width=1000, height=600)
                             self.scrollable_frame.grid(row=1, column=0, columnspan=30)
 
-                            self.load_booking_history()  # Load all bookings initially
+                            self.load_booking_history()  
 
                      def search_booking(self):
                             booking_id = self.search_entry.get()
-                            if booking_id == "":  # If no ID is entered, load all bookings
+                            if booking_id == "": 
                                    self.load_booking_history()
-                            elif booking_id.isdigit():  # Check if the entered value is a valid ID
+                            elif booking_id.isdigit():  
                                    self.display_specific_booking(int(booking_id))
                             else:
                                    messagebox.showerror(title="Invalid Input", message="Please enter a valid booking ID.")

@@ -164,8 +164,6 @@ class BookingWindow(customtkinter.CTkToplevel):
         self.radio_esewa.grid(row=10,column=1,columnspan=3)
         
 
-        
-        # Book Button
         bookingButton = customtkinter.CTkButton(bookingFrame, text="Book", font=("arial", 20, "bold"), corner_radius=10, height=30, width=40, text_color="white", fg_color="#B7D5B5", command=self.book)
         bookingButton.grid(row=11, column=0, columnspan=3, pady=20)
 
@@ -176,7 +174,7 @@ class BookingWindow(customtkinter.CTkToplevel):
     
 
     def get_booking_details(self):
-        # Retrieve booking details by booking_id
+        
         conn = sqlite3.connect('hotel_management_user.db')
         c = conn.cursor()
         c.execute("SELECT * FROM bookings WHERE id = ?", (self.booking_id,))
@@ -213,7 +211,7 @@ class BookingWindow(customtkinter.CTkToplevel):
         if validation_result is True:
             try:
                             
-                checkin_date_obj = datetime.datetime.strptime(checkin_date, "%d/%m/%Y")  # Ensure format is DD/MM/YYYY
+                checkin_date_obj = datetime.datetime.strptime(checkin_date, "%d/%m/%Y")  
                 today = datetime.datetime.today()
 
                 
