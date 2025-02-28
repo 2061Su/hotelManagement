@@ -1,10 +1,10 @@
 
-        Booking ID: 72
+        Booking ID: 78
         Name: sumit saru
         Email: sumit@gmail.com
-        Phone Number: 0987654321
-        Number of Guests: 2
+        Phone Number: 9876543218
+        Number of Guests: 4
         Check-in Date: 28/02/2025
         Check-out Date: 01/03/2025
-        Room No: 2
+        Room No: 3
         
